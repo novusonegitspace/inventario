@@ -1,0 +1,551 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider     = "sqlserver"
+  url          = env("DATABASE_URL")
+  relationMode = "prisma"
+}
+
+model Tenant {
+  id                             String                            @id @default(uuid())
+  slug                           String                            @unique
+  name                           String
+  isActive                       Boolean                           @default(true) @map("is_active")
+  createdAt                      DateTime                          @default(now()) @map("created_at")
+  updatedAt                      DateTime                          @updatedAt @map("updated_at")
+  users                          TenantUser[]
+  clients                        Client[]
+  campaigns                      Campaign[]
+  campaignSettings               CampaignSettings[]
+  campaignInventoryFields        CampaignInventoryField[]
+  campaignReconciliationCriteria CampaignReconciliationCriterion[]
+  assetMasterRows                AssetMasterRow[]
+  assets                         Asset[]
+  campaignAuditors               CampaignAuditor[]
+  assignments                    Assignment[]
+  assetCaptures                  AssetCapture[]
+  assetCaptureConditions         AssetCaptureCondition[]
+  evidenceFiles                  EvidenceFile[]
+  reconciliationResults          ReconciliationResult[]
+  findings                       Finding[]
+  auditLogs                      AuditLog[]
+  timelineEvents                 BusinessTimelineEvent[]
+  importJobs                     ImportJob[]
+  exportJobs                     ExportJob[]
+
+  @@map("tenants")
+}
+
+model User {
+  id                    String                  @id @default(uuid())
+  email                 String                  @unique
+  displayName           String?                 @map("display_name")
+  entraObjectId         String?                 @unique @map("entra_object_id")
+  createdAt             DateTime                @default(now()) @map("created_at")
+  updatedAt             DateTime                @updatedAt @map("updated_at")
+  tenantMemberships     TenantUser[]
+  campaignsCreated      Campaign[]              @relation("CampaignCreatedBy")
+  campaignAuditors      CampaignAuditor[]
+  assignments           Assignment[]
+  capturesSubmitted     AssetCapture[]          @relation("CaptureSubmittedBy")
+  evidenceUploaded      EvidenceFile[]          @relation("EvidenceUploadedBy")
+  reconciliationReviews ReconciliationResult[]  @relation("ReconciliationReviewedBy")
+  findingsCreated       Finding[]               @relation("FindingCreatedBy")
+  timelineEvents        BusinessTimelineEvent[] @relation("TimelineActor")
+  auditLogs             AuditLog[]              @relation("AuditActor")
+  requestedImportJobs   ImportJob[]             @relation("ImportRequestedBy")
+  requestedExportJobs   ExportJob[]             @relation("ExportRequestedBy")
+
+  @@map("users")
+}
+
+model TenantUser {
+  id         String    @id @default(uuid())
+  tenantId   String    @map("tenant_id")
+  userId     String    @map("user_id")
+  /// Allowed values: TENANT_ADMIN, PROJECT_LEAD, SUPERVISOR, FIELD_AUDITOR, CLIENT
+  role       String
+  isActive   Boolean   @default(true) @map("is_active")
+  joinedAt   DateTime  @default(now()) @map("joined_at")
+  lastSeenAt DateTime? @map("last_seen_at")
+  tenant     Tenant    @relation(fields: [tenantId], references: [id])
+  user       User      @relation(fields: [userId], references: [id])
+
+  @@unique([tenantId, userId])
+  @@index([tenantId, role])
+  @@index([userId])
+  @@map("tenant_users")
+}
+
+model Client {
+  id        String     @id @default(uuid())
+  tenantId  String     @map("tenant_id")
+  code      String
+  name      String
+  isActive  Boolean    @default(true) @map("is_active")
+  createdAt DateTime   @default(now()) @map("created_at")
+  updatedAt DateTime   @updatedAt @map("updated_at")
+  tenant    Tenant     @relation(fields: [tenantId], references: [id])
+  campaigns Campaign[]
+
+  @@unique([tenantId, code])
+  @@index([tenantId])
+  @@map("clients")
+}
+
+model Campaign {
+  id                     String                            @id @default(uuid())
+  tenantId               String                            @map("tenant_id")
+  clientId               String?                           @map("client_id")
+  createdById            String?                           @map("created_by_id")
+  code                   String
+  name                   String
+  description            String?
+  siteName               String?                           @map("site_name")
+  /// Allowed values: DRAFT, ACTIVE, CLOSED
+  status                 String                            @default("DRAFT")
+  /// Allowed values: FULL_COUNT, SELECTIVE, CYCLE_COUNT
+  inventoryMode          String                            @default("FULL_COUNT") @map("inventory_mode")
+  progressPercentage     Int                               @default(0) @map("progress_percentage")
+  scheduledStartAt       DateTime?                         @map("scheduled_start_at")
+  scheduledEndAt         DateTime?                         @map("scheduled_end_at")
+  startedAt              DateTime?                         @map("started_at")
+  closedAt               DateTime?                         @map("closed_at")
+  createdAt              DateTime                          @default(now()) @map("created_at")
+  updatedAt              DateTime                          @updatedAt @map("updated_at")
+  tenant                 Tenant                            @relation(fields: [tenantId], references: [id])
+  client                 Client?                           @relation(fields: [clientId], references: [id])
+  createdBy              User?                             @relation("CampaignCreatedBy", fields: [createdById], references: [id])
+  settings               CampaignSettings?
+  inventoryFields        CampaignInventoryField[]
+  reconciliationCriteria CampaignReconciliationCriterion[]
+  assetMasterRows        AssetMasterRow[]
+  assets                 Asset[]
+  auditors               CampaignAuditor[]
+  assignments            Assignment[]
+  captures               AssetCapture[]
+  captureConditions      AssetCaptureCondition[]
+  evidenceFiles          EvidenceFile[]
+  reconciliationResults  ReconciliationResult[]
+  findings               Finding[]
+  timelineEvents         BusinessTimelineEvent[]
+  auditLogs              AuditLog[]
+  importJobs             ImportJob[]
+  exportJobs             ExportJob[]
+
+  @@unique([tenantId, code])
+  @@index([tenantId, status])
+  @@index([tenantId, clientId])
+  @@index([clientId])
+  @@index([createdById])
+  @@map("campaigns")
+}
+
+model CampaignSettings {
+  id                   String   @id @default(uuid())
+  tenantId             String   @map("tenant_id")
+  campaignId           String   @unique @map("campaign_id")
+  captureRequiresPhoto Boolean  @default(false) @map("capture_requires_photo")
+  captureRequiresGeo   Boolean  @default(false) @map("capture_requires_geo")
+  allowManualAssets    Boolean  @default(false) @map("allow_manual_assets")
+  closeBlocksCaptures  Boolean  @default(true) @map("close_blocks_captures")
+  notes                String?
+  createdAt            DateTime @default(now()) @map("created_at")
+  updatedAt            DateTime @updatedAt @map("updated_at")
+  tenant               Tenant   @relation(fields: [tenantId], references: [id])
+  campaign             Campaign @relation(fields: [campaignId], references: [id])
+
+  @@index([tenantId, campaignId])
+  @@map("campaign_settings")
+}
+
+model CampaignInventoryField {
+  id         String   @id @default(uuid())
+  tenantId   String   @map("tenant_id")
+  campaignId String   @map("campaign_id")
+  key        String
+  label      String
+  /// Allowed values: TEXT, NUMBER, DATE, BOOLEAN, SELECT
+  dataType   String   @map("data_type")
+  isRequired Boolean  @default(false) @map("is_required")
+  isVisible  Boolean  @default(true) @map("is_visible")
+  position   Int      @default(0)
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+  tenant     Tenant   @relation(fields: [tenantId], references: [id])
+  campaign   Campaign @relation(fields: [campaignId], references: [id])
+
+  @@unique([campaignId, key])
+  @@index([tenantId, campaignId])
+  @@map("campaign_inventory_fields")
+}
+
+model CampaignReconciliationCriterion {
+  id         String   @id @default(uuid())
+  tenantId   String   @map("tenant_id")
+  campaignId String   @map("campaign_id")
+  /// Allowed values: LOCATION, RESPONSIBLE, PHYSICAL_CONDITION, COST_CENTER, SERIAL_NUMBER
+  code       String
+  label      String
+  isEnabled  Boolean  @default(true) @map("is_enabled")
+  position   Int      @default(0)
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+  tenant     Tenant   @relation(fields: [tenantId], references: [id])
+  campaign   Campaign @relation(fields: [campaignId], references: [id])
+
+  @@unique([campaignId, code])
+  @@index([tenantId, campaignId])
+  @@map("campaign_reconciliation_criteria")
+}
+
+model AssetMasterRow {
+  id              String     @id @default(uuid())
+  tenantId        String     @map("tenant_id")
+  campaignId      String     @map("campaign_id")
+  importJobId     String?    @map("import_job_id")
+  rowNumber       Int        @map("row_number")
+  assetTag        String     @map("asset_tag")
+  barcode         String?
+  assetName       String     @map("asset_name")
+  serialNumber    String?    @map("serial_number")
+  location        String?
+  responsible     String?
+  costCenter      String?    @map("cost_center")
+  sourceReference String?    @map("source_reference")
+  importedAt      DateTime   @default(now()) @map("imported_at")
+  tenant          Tenant     @relation(fields: [tenantId], references: [id])
+  campaign        Campaign   @relation(fields: [campaignId], references: [id])
+  importJob       ImportJob? @relation(fields: [importJobId], references: [id])
+  asset           Asset?
+
+  @@unique([tenantId, campaignId, rowNumber])
+  @@index([tenantId, campaignId])
+  @@index([tenantId, campaignId, assetTag])
+  @@index([tenantId, campaignId, barcode])
+  @@index([campaignId])
+  @@index([importJobId])
+  @@map("asset_master_rows")
+}
+
+model Asset {
+  id                    String                 @id @default(uuid())
+  tenantId              String                 @map("tenant_id")
+  campaignId            String                 @map("campaign_id")
+  assetMasterRowId      String?                @unique @map("asset_master_row_id")
+  assetTag              String                 @map("asset_tag")
+  barcode               String?
+  name                  String
+  serialNumber          String?                @map("serial_number")
+  location              String?
+  responsible           String?
+  costCenter            String?                @map("cost_center")
+  isActive              Boolean                @default(true) @map("is_active")
+  latestCaptureAt       DateTime?              @map("latest_capture_at")
+  createdAt             DateTime               @default(now()) @map("created_at")
+  updatedAt             DateTime               @updatedAt @map("updated_at")
+  tenant                Tenant                 @relation(fields: [tenantId], references: [id])
+  campaign              Campaign               @relation(fields: [campaignId], references: [id])
+  assetMasterRow        AssetMasterRow?        @relation(fields: [assetMasterRowId], references: [id])
+  assignments           Assignment[]
+  captures              AssetCapture[]
+  evidenceFiles         EvidenceFile[]
+  reconciliationResults ReconciliationResult[]
+  findings              Finding[]
+
+  @@unique([tenantId, campaignId, assetTag])
+  @@index([tenantId, campaignId, barcode])
+  @@index([tenantId, campaignId])
+  @@index([campaignId])
+  @@map("assets")
+}
+
+model CampaignAuditor {
+  id         String    @id @default(uuid())
+  tenantId   String    @map("tenant_id")
+  campaignId String    @map("campaign_id")
+  userId     String    @map("user_id")
+  /// Allowed values: TENANT_ADMIN, PROJECT_LEAD, SUPERVISOR, FIELD_AUDITOR, CLIENT
+  role       String
+  assignedAt DateTime  @default(now()) @map("assigned_at")
+  removedAt  DateTime? @map("removed_at")
+  tenant     Tenant    @relation(fields: [tenantId], references: [id])
+  campaign   Campaign  @relation(fields: [campaignId], references: [id])
+  user       User      @relation(fields: [userId], references: [id])
+
+  @@unique([tenantId, campaignId, userId])
+  @@index([tenantId, campaignId])
+  @@index([campaignId])
+  @@index([userId])
+  @@map("campaign_auditors")
+}
+
+model Assignment {
+  id          String    @id @default(uuid())
+  tenantId    String    @map("tenant_id")
+  campaignId  String    @map("campaign_id")
+  assetId     String    @map("asset_id")
+  userId      String    @map("user_id")
+  /// Allowed values: PENDING, ACCEPTED, COMPLETED
+  status      String    @default("PENDING")
+  note        String?
+  assignedAt  DateTime  @default(now()) @map("assigned_at")
+  completedAt DateTime? @map("completed_at")
+  tenant      Tenant    @relation(fields: [tenantId], references: [id])
+  campaign    Campaign  @relation(fields: [campaignId], references: [id])
+  asset       Asset     @relation(fields: [assetId], references: [id])
+  user        User      @relation(fields: [userId], references: [id])
+
+  @@unique([campaignId, assetId, userId])
+  @@index([tenantId, campaignId])
+  @@index([assetId])
+  @@index([userId])
+  @@map("assignments")
+}
+
+model AssetCapture {
+  id                    String                 @id @default(uuid())
+  tenantId              String                 @map("tenant_id")
+  campaignId            String                 @map("campaign_id")
+  assetId               String?                @map("asset_id")
+  submittedById         String?                @map("submitted_by_id")
+  scannedCode           String                 @map("scanned_code")
+  latitude              Decimal?
+  longitude             Decimal?
+  notes                 String?
+  capturedAt            DateTime               @default(now()) @map("captured_at")
+  deviceLabel           String?                @map("device_label")
+  tenant                Tenant                 @relation(fields: [tenantId], references: [id])
+  campaign              Campaign               @relation(fields: [campaignId], references: [id])
+  asset                 Asset?                 @relation(fields: [assetId], references: [id])
+  submittedBy           User?                  @relation("CaptureSubmittedBy", fields: [submittedById], references: [id])
+  condition             AssetCaptureCondition?
+  evidenceFiles         EvidenceFile[]
+  reconciliationResults ReconciliationResult[]
+
+  @@index([tenantId, campaignId])
+  @@index([tenantId, campaignId, assetId])
+  @@index([campaignId])
+  @@index([assetId])
+  @@index([submittedById])
+  @@map("asset_captures")
+}
+
+model AssetCaptureCondition {
+  id                   String       @id @default(uuid())
+  tenantId             String       @map("tenant_id")
+  campaignId           String       @map("campaign_id")
+  captureId            String       @unique @map("capture_id")
+  physicalCondition    String?      @map("physical_condition")
+  observedLocation     String?      @map("observed_location")
+  observedResponsible  String?      @map("observed_responsible")
+  observedCostCenter   String?      @map("observed_cost_center")
+  observedSerialNumber String?      @map("observed_serial_number")
+  notes                String?
+  tenant               Tenant       @relation(fields: [tenantId], references: [id])
+  campaign             Campaign     @relation(fields: [campaignId], references: [id])
+  capture              AssetCapture @relation(fields: [captureId], references: [id])
+
+  @@index([tenantId, campaignId])
+  @@index([campaignId])
+  @@map("asset_capture_conditions")
+}
+
+model EvidenceFile {
+  id               String        @id @default(uuid())
+  tenantId         String        @map("tenant_id")
+  campaignId       String        @map("campaign_id")
+  assetId          String?       @map("asset_id")
+  captureId        String?       @map("capture_id")
+  uploadedById     String?       @map("uploaded_by_id")
+  sha256           String
+  originalFileName String        @map("original_file_name")
+  blobPath         String        @map("blob_path")
+  mimeType         String        @map("mime_type")
+  sizeBytes        BigInt        @map("size_bytes")
+  /// Allowed values: UPLOADED_PENDING_SCAN, AVAILABLE, QUARANTINED, REJECTED
+  status           String        @default("UPLOADED_PENDING_SCAN")
+  uploadedAt       DateTime      @default(now()) @map("uploaded_at")
+  availableAt      DateTime?     @map("available_at")
+  tenant           Tenant        @relation(fields: [tenantId], references: [id])
+  campaign         Campaign      @relation(fields: [campaignId], references: [id])
+  asset            Asset?        @relation(fields: [assetId], references: [id])
+  capture          AssetCapture? @relation(fields: [captureId], references: [id])
+  uploadedBy       User?         @relation("EvidenceUploadedBy", fields: [uploadedById], references: [id])
+
+  @@unique([tenantId, sha256])
+  @@index([tenantId, campaignId])
+  @@index([tenantId, campaignId, assetId])
+  @@index([tenantId, campaignId, captureId])
+  @@index([campaignId])
+  @@index([assetId])
+  @@index([captureId])
+  @@index([uploadedById])
+  @@map("evidence_files")
+}
+
+model ReconciliationResult {
+  id                       String        @id @default(uuid())
+  tenantId                 String        @map("tenant_id")
+  campaignId               String        @map("campaign_id")
+  assetId                  String?       @map("asset_id")
+  captureId                String?       @map("capture_id")
+  reviewedById             String?       @map("reviewed_by_id")
+  /// Allowed values: PENDING, CONCILIATED, CONCILIATED_WITH_DIFFERENCES, NOT_FOUND, SURPLUS
+  status                   String        @default("PENDING")
+  snapshotVersion          Int           @default(1) @map("snapshot_version")
+  matchedByCode            Boolean       @default(false) @map("matched_by_code")
+  locationMatches          Boolean?      @map("location_matches")
+  responsibleMatches       Boolean?      @map("responsible_matches")
+  physicalConditionMatches Boolean?      @map("physical_condition_matches")
+  costCenterMatches        Boolean?      @map("cost_center_matches")
+  serialNumberMatches      Boolean?      @map("serial_number_matches")
+  notes                    String?
+  reviewedAt               DateTime?     @map("reviewed_at")
+  calculatedAt             DateTime      @default(now()) @map("calculated_at")
+  tenant                   Tenant        @relation(fields: [tenantId], references: [id])
+  campaign                 Campaign      @relation(fields: [campaignId], references: [id])
+  asset                    Asset?        @relation(fields: [assetId], references: [id])
+  capture                  AssetCapture? @relation(fields: [captureId], references: [id])
+  reviewedBy               User?         @relation("ReconciliationReviewedBy", fields: [reviewedById], references: [id])
+  findings                 Finding[]
+
+  @@index([tenantId, campaignId])
+  @@index([tenantId, campaignId, assetId])
+  @@index([tenantId, campaignId, captureId])
+  @@index([campaignId])
+  @@index([assetId])
+  @@index([captureId])
+  @@index([reviewedById])
+  @@map("reconciliation_results")
+}
+
+model Finding {
+  id                     String                @id @default(uuid())
+  tenantId               String                @map("tenant_id")
+  campaignId             String                @map("campaign_id")
+  assetId                String?               @map("asset_id")
+  reconciliationResultId String?               @map("reconciliation_result_id")
+  createdById            String?               @map("created_by_id")
+  title                  String
+  description            String?
+  /// Allowed values: LOW, MEDIUM, HIGH, CRITICAL
+  severity               String                @default("MEDIUM")
+  /// Allowed values: OPEN, IN_REVIEW, RESOLVED, DISMISSED
+  status                 String                @default("OPEN")
+  createdAt              DateTime              @default(now()) @map("created_at")
+  resolvedAt             DateTime?             @map("resolved_at")
+  tenant                 Tenant                @relation(fields: [tenantId], references: [id])
+  campaign               Campaign              @relation(fields: [campaignId], references: [id])
+  asset                  Asset?                @relation(fields: [assetId], references: [id])
+  reconciliationResult   ReconciliationResult? @relation(fields: [reconciliationResultId], references: [id])
+  createdBy              User?                 @relation("FindingCreatedBy", fields: [createdById], references: [id])
+
+  @@index([tenantId, campaignId])
+  @@index([campaignId])
+  @@index([assetId])
+  @@index([reconciliationResultId])
+  @@index([createdById])
+  @@map("findings")
+}
+
+model BusinessTimelineEvent {
+  id          String   @id @default(uuid())
+  tenantId    String   @map("tenant_id")
+  campaignId  String   @map("campaign_id")
+  actorUserId String?  @map("actor_user_id")
+  /// Allowed values: CAMPAIGN_CREATED, CAMPAIGN_ACTIVATED, CAMPAIGN_CLOSED, SETTINGS_UPDATED, ASSET_IMPORTED, CAPTURE_CREATED, RECONCILIATION_RECALCULATED, EXPORT_REQUESTED
+  type        String
+  title       String
+  description String?
+  occurredAt  DateTime @default(now()) @map("occurred_at")
+  tenant      Tenant   @relation(fields: [tenantId], references: [id])
+  campaign    Campaign @relation(fields: [campaignId], references: [id])
+  actorUser   User?    @relation("TimelineActor", fields: [actorUserId], references: [id])
+
+  @@index([tenantId, campaignId, occurredAt])
+  @@index([campaignId])
+  @@index([actorUserId])
+  @@map("business_timeline_events")
+}
+
+model AuditLog {
+  id          String    @id @default(uuid())
+  tenantId    String    @map("tenant_id")
+  campaignId  String?   @map("campaign_id")
+  actorUserId String?   @map("actor_user_id")
+  entityType  String    @map("entity_type")
+  entityId    String    @map("entity_id")
+  action      String
+  beforeState String?   @map("before_state")
+  afterState  String?   @map("after_state")
+  requestId   String?   @map("request_id")
+  occurredAt  DateTime  @default(now()) @map("occurred_at")
+  tenant      Tenant    @relation(fields: [tenantId], references: [id])
+  campaign    Campaign? @relation(fields: [campaignId], references: [id])
+  actorUser   User?     @relation("AuditActor", fields: [actorUserId], references: [id])
+
+  @@index([tenantId, campaignId, occurredAt])
+  @@index([campaignId])
+  @@index([actorUserId])
+  @@map("audit_log")
+}
+
+model ImportJob {
+  id              String           @id @default(uuid())
+  tenantId        String           @map("tenant_id")
+  campaignId      String?          @map("campaign_id")
+  requestedById   String?          @map("requested_by_id")
+  /// Allowed values: ASSET_MASTER
+  kind            String
+  /// Allowed values: QUEUED, RUNNING, SUCCEEDED, FAILED, CANCELED
+  status          String           @default("QUEUED")
+  sourceFileName  String           @map("source_file_name")
+  sourceBlobPath  String?          @map("source_blob_path")
+  totalRows       Int?             @map("total_rows")
+  processedRows   Int?             @map("processed_rows")
+  errorMessage    String?          @map("error_message")
+  startedAt       DateTime?        @map("started_at")
+  completedAt     DateTime?        @map("completed_at")
+  createdAt       DateTime         @default(now()) @map("created_at")
+  updatedAt       DateTime         @updatedAt @map("updated_at")
+  tenant          Tenant           @relation(fields: [tenantId], references: [id])
+  campaign        Campaign?        @relation(fields: [campaignId], references: [id])
+  requestedBy     User?            @relation("ImportRequestedBy", fields: [requestedById], references: [id])
+  assetMasterRows AssetMasterRow[]
+
+  @@index([tenantId, campaignId])
+  @@index([tenantId, status])
+  @@index([campaignId])
+  @@index([requestedById])
+  @@map("import_jobs")
+}
+
+model ExportJob {
+  id             String    @id @default(uuid())
+  tenantId       String    @map("tenant_id")
+  campaignId     String?   @map("campaign_id")
+  requestedById  String?   @map("requested_by_id")
+  /// Allowed values: EXCEL, PDF, EVIDENCE_ZIP
+  kind           String
+  /// Allowed values: QUEUED, RUNNING, SUCCEEDED, FAILED, CANCELED
+  status         String    @default("QUEUED")
+  outputFileName String?   @map("output_file_name")
+  outputBlobPath String?   @map("output_blob_path")
+  errorMessage   String?   @map("error_message")
+  startedAt      DateTime? @map("started_at")
+  completedAt    DateTime? @map("completed_at")
+  createdAt      DateTime  @default(now()) @map("created_at")
+  updatedAt      DateTime  @updatedAt @map("updated_at")
+  tenant         Tenant    @relation(fields: [tenantId], references: [id])
+  campaign       Campaign? @relation(fields: [campaignId], references: [id])
+  requestedBy    User?     @relation("ExportRequestedBy", fields: [requestedById], references: [id])
+
+  @@index([tenantId, campaignId])
+  @@index([tenantId, status])
+  @@index([campaignId])
+  @@index([requestedById])
+  @@map("export_jobs")
+}

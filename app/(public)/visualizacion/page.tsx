@@ -29,15 +29,15 @@ export default function VisualizacionPage() {
 
       <SectionHeading
         align="center"
-        eyebrow="Shared UI"
-        title="Visualización de componentes compartidos"
-        description="Esta página reúne los primeros bloques transversales del producto. La intención es que los futuros dominios compongan sobre estas piezas, no que redefinan sus propias bases visuales."
+        eyebrow="Recorrido visual"
+        title="Así se verá la experiencia de AssetLens en sus principales pantallas"
+        description="Explore la estética de navegación, métricas, seguimiento y control que acompañará campañas, captura móvil y revisión operativa."
         actions={
           <>
             <Button href="/" variant="secondary">
-              Ver composición
+              Ver portada
             </Button>
-            <Button href="#catalogo">Ir al catálogo</Button>
+            <Button href="#catalogo">Ver recorrido</Button>
           </>
         }
       />
@@ -47,45 +47,42 @@ export default function VisualizacionPage() {
           <div className="space-y-6">
             <div className="space-y-3">
               <p className="text-sm font-semibold uppercase tracking-[0.26em] text-emerald-300/72">
-                Navegación y acciones
+                Navegación principal
               </p>
               <h2 className="text-3xl font-semibold tracking-[-0.05em] text-white">
-                Botones y estados rápidos
+                Accesos rápidos para entrar, revisar y continuar la operación
               </h2>
             </div>
             <div className="flex flex-wrap gap-3">
-              <Button href="/">Primary</Button>
-              <Button href="/visualizacion" variant="secondary">
-                Secondary
-              </Button>
-              <Button variant="ghost">Ghost</Button>
+              <Button href="/">Ir al inicio</Button>
+              <Button variant="ghost">Acción secundaria</Button>
             </div>
             <div className="flex flex-wrap gap-3">
-              <Badge>Badge emerald</Badge>
-              <Badge tone="slate">Badge slate</Badge>
-              <Badge tone="outline">Badge outline</Badge>
+              <Badge>Operación activa</Badge>
+              <Badge tone="slate">Seguimiento</Badge>
+              <Badge tone="outline">Solo lectura</Badge>
             </div>
             <LogoStrip items={logoItems.slice(0, 5)} />
           </div>
         </Panel>
 
         <FeatureCard
-          eyebrow="Superficies"
-          title="Panel y tarjetas como contenedor base"
-          description="Usamos superficies oscuras con borde sutil, glow controlado y jerarquía tipográfica fuerte para que campañas, reportes y auditoría compartan el mismo sistema."
-          footer="Props principales: padding, glow, visual y footer."
+          eyebrow="Pantallas"
+          title="Tarjetas y paneles pensados para información operativa"
+          description="La interfaz prioriza lectura rápida de campañas, alertas y métricas, con suficiente contraste para jornadas largas de supervisión."
+          footer="Una base visual consistente ayuda a que el equipo identifique estados y acciones sin fricción."
           visual={
             <div className="grid gap-4 sm:grid-cols-2">
               <Panel padding="sm">
-                <p className="text-sm text-white/52">Panel sm</p>
+                <p className="text-sm text-white/52">Vista resumida</p>
                 <p className="mt-2 text-lg font-semibold text-white">
-                  Contenedor compacto
+                  Información compacta
                 </p>
               </Panel>
               <Panel glow>
-                <p className="text-sm text-white/52">Panel glow</p>
+                <p className="text-sm text-white/52">Elemento destacado</p>
                 <p className="mt-2 text-lg font-semibold text-white">
-                  Contenedor destacado
+                  Atención inmediata
                 </p>
               </Panel>
             </div>
@@ -95,23 +92,23 @@ export default function VisualizacionPage() {
 
       <section className="space-y-8">
         <SectionHeading
-          eyebrow="Data"
-          title="Bloques para métricas operativas"
-          description="La idea no es solo tener una landing bonita. Estos bloques están pensados para representar ratios de conciliación, asignaciones, tendencias y estados de ejecución."
+          eyebrow="Seguimiento"
+          title="Métricas pensadas para supervisar inventarios en curso"
+          description="Estos bloques muestran avance, asignaciones y desempeño para que la coordinación del inventario sea clara en cada etapa."
         />
         <div className="grid gap-6 lg:grid-cols-3">
           <StatCard
-            title="Bar chart"
+            title="Ritmo de captura"
             value="78%"
-            summary="SignalBars acepta un arreglo de porcentajes y se reutiliza en dashboards o vistas de detalle."
-            trend="SignalBars"
+            summary="Visualiza la intensidad de trabajo del equipo durante la jornada y ayuda a detectar pausas o zonas de menor avance."
+            trend="Seguimiento"
             visual={<SignalBars values={chartValues} />}
           />
           <StatCard
-            title="Avatar stack"
+            title="Equipo asignado"
             value="4"
-            summary="AvatarStack comunica asignación rápida para auditores, supervisores o responsables."
-            trend="AvatarStack"
+            summary="Identifica rápidamente quiénes participan en la campaña y facilita la coordinación entre supervisión y terreno."
+            trend="Cuadrilla"
             visual={<AvatarStack users={auditors} />}
           />
           <StatCard
@@ -125,16 +122,16 @@ export default function VisualizacionPage() {
 
       <section className="grid gap-6 lg:grid-cols-2">
         <FeatureCard
-          eyebrow="SectionHeading"
-          title="Encabezado reusable para bloques de producto"
-          description="SectionHeading unifica eyebrow, título, descripción y acciones. Con eso evitamos que cada dominio reinvente su propio patrón de introducción."
-          footer="Props principales: eyebrow, title, description, align y actions."
+          eyebrow="Orientación"
+          title="Encabezados claros para cada etapa de la operación"
+          description="Cada bloque ayuda al usuario a entender qué está viendo, qué puede hacer y qué impacto tiene en el avance del inventario."
+          footer="La claridad en los encabezados reduce dudas y acelera la ejecución diaria."
         />
         <FeatureCard
-          eyebrow="TopNav"
-          title="Barra superior lista para áreas públicas o internas"
-          description="TopNav acepta marca, items y CTA principal. Más adelante puede recibir estado de sesión o tenant sin cambiar la intención del componente."
-          footer="Props principales: brand, items, ctaLabel y ctaHref."
+          eyebrow="Navegación"
+          title="Una barra superior pensada para entrar y moverse rápido"
+          description="La navegación mantiene a mano las acciones principales para que el usuario pase del inicio a campañas, seguimiento y control sin perder contexto."
+          footer="El objetivo es que la operación fluya con pocos clics y rutas claras."
         />
       </section>
     </main>
