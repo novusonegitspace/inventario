@@ -1,5 +1,6 @@
 import Image from "next/image";
 
+import { getAuthSession } from "@/src/features/auth/session";
 import {
   auditors,
   controlStats,
@@ -21,12 +22,18 @@ import { SignalBars } from "@/src/shared/ui/signal-bars";
 import { StatCard } from "@/src/shared/ui/stat-card";
 import { TopNav } from "@/src/shared/ui/top-nav";
 
-export default function Home() {
+export default async function Home() {
+  const session = await getAuthSession();
+  const dashboardHref = session ? "/dashboard" : "/login";
+  const dashboardLabel = session ? "Ir al dashboard" : "Entrar";
+
   return (
     <main className="mx-auto flex w-full max-w-[1680px] flex-1 flex-col gap-12 px-4 py-6 sm:px-6 lg:px-8">
       <TopNav
         activeHref="/"
         brand="AssetLens"
+        ctaHref={dashboardHref}
+        ctaLabel={dashboardLabel}
         items={landingNavItems}
       />
 
@@ -48,7 +55,10 @@ export default function Home() {
               </p>
             </div>
             <div className="flex flex-col gap-3 sm:flex-row">
-              <Button href="#escaneo" size="lg">
+              <Button href={dashboardHref} size="lg">
+                {session ? "Abrir dashboard" : "Entrar al dashboard"}
+              </Button>
+              <Button href="#escaneo" size="lg" variant="secondary">
                 Ver escaneo móvil
               </Button>
             </div>
@@ -144,7 +154,7 @@ export default function Home() {
         <SectionHeading
           eyebrow="Escaneo móvil"
           title="La captura ocurre donde está el activo, no detrás de un escritorio"
-          description="La experiencia de terreno es parte central del producto. El auditor puede leer el código, adjuntar evidencia y dejar observaciones sin cambiar de dispositivo."
+          description="El equipo puede registrar activos en terreno con el mismo celular que ya usa a diario, adjuntando evidencia y observaciones en una sola acción."
         />
         <div className="grid gap-6 lg:grid-cols-2">
           {mobileScanHighlights.map((module) => (
@@ -178,7 +188,7 @@ export default function Home() {
         <SectionHeading
           eyebrow="Flujo operativo"
           title="Una campaña completa, desde el maestro hasta el reporte final"
-          description="La portada tiene que prometer el flujo correcto del producto: preparar, capturar, conciliar y cerrar. No solo mostrar métricas aisladas."
+          description="AssetLens acompaña todo el proceso: preparación, captura en terreno, conciliación de diferencias y cierre con respaldo documental."
         />
         <div className="grid gap-5 lg:grid-cols-4">
           {inventoryFlow.map((stage) => (

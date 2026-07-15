@@ -9,7 +9,6 @@ export const landingNavItems: TopNavItem[] = [
 
 export const navItems: TopNavItem[] = [
   { href: "/", label: "Inicio" },
-  { href: "/visualizacion", label: "Visualización" },
   { href: "#modulos", label: "Módulos" },
   { href: "#metricas", label: "Métricas" },
 ];
@@ -49,7 +48,7 @@ export const mobileScanHighlights = [
     title: "Cada lectura puede llevar foto, ubicación y observaciones",
     description:
       "La captura no termina en el código: se complementa con evidencia visual, metadata y contexto para auditoría y conciliación posterior.",
-    footer: "Pensado para operaciones físicas, no para demos aisladas.",
+    footer: "Ideal para respaldar conteos físicos con contexto útil y verificable.",
   },
 ];
 
@@ -123,25 +122,25 @@ export const sharedModules = [
 
 export const statCards = [
   {
-    title: "Costo por despliegue",
+    title: "Tiempo de preparación",
     value: "-18%",
     summary:
-      "Menos retrabajo visual al reutilizar botones, paneles, tarjetas y patrones de navegación.",
+      "Una interfaz consistente permite preparar campañas y capacitar equipos con menos retrabajo operativo.",
     trend: "Optimizado",
   },
   {
-    title: "Cobertura visual",
+    title: "Cobertura operativa",
     value: "90%",
     summary:
-      "Las pantallas nuevas arrancan con piezas ya tipadas y consistentes en vez de HTML ad hoc.",
-    trend: "Base común",
+      "Las vistas priorizan seguimiento, captura y control para acompañar el flujo real del inventario.",
+    trend: "Consistente",
   },
   {
-    title: "Lectura operativa",
+    title: "Lectura continua",
     value: "24/7",
     summary:
-      "Cards de métricas y estados pensados para escritorio operativo y uso móvil en terreno.",
-    trend: "P0 listo",
+      "La información clave permanece visible para supervisión, conciliación y operación en terreno.",
+    trend: "Siempre visible",
   },
 ];
 
