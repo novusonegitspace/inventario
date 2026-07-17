@@ -67,6 +67,13 @@ export function CaptureForm({
 
   return (
     <div className="space-y-6">
+      {!canCapture ? (
+        <div className="rounded-[24px] border border-amber-300/18 bg-amber-300/10 px-5 py-4 text-sm leading-7 text-amber-100">
+          La campaña aún está en preparación. Iníciela desde el resumen de campaña
+          para habilitar cámara, capturas y registro de terreno.
+        </div>
+      ) : null}
+
       <MobileBarcodeScanner
         disabled={!canCapture}
         onDetected={(code) => {

@@ -208,7 +208,11 @@ export function MobileBarcodeScanner({
             size="sm"
             type="button"
           >
-            {isStarting ? "Abriendo cámara..." : "Escanear con cámara"}
+            {disabled
+              ? "Disponible cuando la campaña esté activa"
+              : isStarting
+                ? "Abriendo cámara..."
+                : "Escanear con cámara"}
           </Button>
           {isActive ? (
             <Button onClick={stopScanner} size="sm" type="button" variant="secondary">
@@ -251,7 +255,9 @@ export function MobileBarcodeScanner({
               Estado
             </p>
             <p className="mt-2 text-lg font-semibold text-white">
-              {isActive
+              {disabled
+                ? "La campaña todavía no admite captura móvil."
+                : isActive
                 ? "La cámara está leyendo códigos en tiempo real."
                 : "Abra la cámara para iniciar el escaneo."}
             </p>
@@ -268,9 +274,9 @@ export function MobileBarcodeScanner({
 
           <div className="rounded-[24px] border border-white/8 bg-black/18 p-5">
             <p className="text-sm leading-7 text-white/60">
-              En navegador móvil la cámara suele exigir HTTPS o `localhost`.
-              Si está probando desde otra IP local, el permiso puede ser rechazado
-              por el propio navegador.
+              {disabled
+                ? "Primero inicie la campaña para habilitar el flujo de terreno. Luego la cámara quedará disponible en esta pantalla."
+                : "En navegador móvil la cámara suele exigir HTTPS o `localhost`. Si está probando desde otra IP local, el permiso puede ser rechazado por el propio navegador."}
             </p>
           </div>
 

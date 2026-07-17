@@ -1,4 +1,7 @@
 import {
+  activateCampaignAction,
+} from "@/src/features/campaigns/actions";
+import {
   canCaptureForCampaign,
   canEditCampaign,
   getCampaignStatusMeta,
@@ -33,6 +36,7 @@ export function CampaignDetailHeader({ campaign }: { campaign: Campaign }) {
   const status = getCampaignStatusMeta(campaign.status);
   const allowsEditing = canEditCampaign(campaign.status);
   const allowsCapture = canCaptureForCampaign(campaign.status);
+  const activateAction = activateCampaignAction.bind(null, campaign.id);
 
   return (
     <Panel className="space-y-6" glow padding="lg">
@@ -57,13 +61,21 @@ export function CampaignDetailHeader({ campaign }: { campaign: Campaign }) {
           <Button href="/campaigns" size="sm" variant="secondary">
             Volver al listado
           </Button>
-          <Button
-            href="#next-modules"
-            size="sm"
-            variant={allowsCapture ? "primary" : "secondary"}
-          >
-            {allowsCapture ? "Preparar captura móvil" : "Captura bloqueada"}
-          </Button>
+          {campaign.status === "draft" ? (
+            <form action={activateAction}>
+              <Button size="sm" type="submit">
+                Iniciar campaña
+              </Button>
+            </form>
+          ) : (
+            <Button
+              href="#next-modules"
+              size="sm"
+              variant={allowsCapture ? "primary" : "secondary"}
+            >
+              {allowsCapture ? "Preparar captura móvil" : "Captura bloqueada"}
+            </Button>
+          )}
         </div>
       </div>
 
@@ -90,6 +102,13 @@ export function CampaignDetailHeader({ campaign }: { campaign: Campaign }) {
           </p>
         </div>
       </div>
+
+      {campaign.status === "draft" ? (
+        <div className="rounded-[24px] border border-amber-300/18 bg-amber-300/10 px-5 py-4 text-sm leading-7 text-amber-100">
+          La campaña sigue en preparación. Mientras no se inicie, la captura móvil,
+          la cámara y el registro de terreno permanecerán bloqueados.
+        </div>
+      ) : null}
     </Panel>
   );
 }

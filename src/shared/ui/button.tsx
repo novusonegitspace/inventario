@@ -82,6 +82,7 @@ export function Button(props: ButtonProps) {
   const classes = cn(
     "inline-flex items-center justify-center rounded-full font-semibold transition duration-200",
     "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300/70 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950",
+    "disabled:cursor-not-allowed disabled:opacity-45 disabled:hover:border-white/10 disabled:hover:bg-white/8 disabled:hover:text-white",
     fullWidth && "w-full",
     sizeClasses[size],
     variantClasses[variant],
