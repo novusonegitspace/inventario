@@ -8,12 +8,6 @@ import { Badge } from "@/src/shared/ui/badge";
 import { Button } from "@/src/shared/ui/button";
 import { Panel } from "@/src/shared/ui/panel";
 
-const ignoredReaderErrors = new Set([
-  "NotFoundException",
-  "ChecksumException",
-  "FormatException",
-]);
-
 function getScannerErrorMessage(error: unknown) {
   if (error instanceof Error) {
     if (error.name === "NotAllowedError") {
@@ -112,24 +106,17 @@ export function MobileBarcodeScanner({
       const codeReader = new BrowserMultiFormatReader();
       const onDecode = (
         result: { getText(): string } | undefined,
-        decodeError: { name?: string } | undefined,
+        _decodeError: { name?: string } | undefined,
         controls: IScannerControls,
       ) => {
         if (result) {
           const nextCode = result.getText().trim();
 
           setLastCode(nextCode);
+          setError(null);
           onDetected(nextCode);
           controlsRef.current = controls;
           stopScanner();
-          return;
-        }
-
-        if (
-          decodeError?.name &&
-          !ignoredReaderErrors.has(decodeError.name)
-        ) {
-          setError("No pudimos interpretar la cámara. Reintente el escaneo.");
         }
       };
 
