@@ -9,7 +9,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "start:azure": "prisma migrate deploy && next start -p ${PORT:-3000} -H 0.0.0.0",
+    "start:azure": "node node_modules/prisma/build/index.js migrate deploy && next start -p ${PORT:-3000} -H 0.0.0.0",
     "lint": "eslint",
     "db:up": "docker compose up -d sqlserver",
     "db:down": "docker compose down",
