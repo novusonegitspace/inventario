@@ -4,6 +4,9 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
 import {
+  activateCampaign,
+} from "@/src/features/campaigns/application/activate-campaign";
+import {
   createCampaign,
   type CreateCampaignFormErrors,
 } from "@/src/features/campaigns/application/create-campaign";
@@ -29,6 +32,20 @@ export type UpdateCampaignSettingsFormState = {
   message?: string;
   values: CampaignSettingsInput;
 };
+
+export async function activateCampaignAction(campaignId: string) {
+  const result = await activateCampaign(campaignId);
+
+  if (!result.ok) {
+    throw new Error(result.message);
+  }
+
+  revalidatePath("/dashboard");
+  revalidatePath("/campaigns");
+  revalidatePath(`/campaigns/${campaignId}`);
+  revalidatePath(`/campaigns/${campaignId}/assets`);
+  redirect(`/campaigns/${campaignId}`);
+}
 
 export async function createCampaignAction(
   _state: CreateCampaignFormState,

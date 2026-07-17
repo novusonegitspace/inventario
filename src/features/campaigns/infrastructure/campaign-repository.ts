@@ -14,6 +14,7 @@ export type CampaignRepository = {
   list(): Promise<Campaign[]>;
   getById(id: string): Promise<Campaign | null>;
   create(input: CreateCampaignDraft): Promise<Campaign>;
+  activate(id: string): Promise<Campaign | null>;
 };
 
 function mapCampaignStatus(status: string) {
@@ -197,6 +198,61 @@ export const campaignRepository: CampaignRepository = {
             tenantId: context.tenantId,
           },
         },
+      },
+      include: {
+        client: true,
+        _count: {
+          select: {
+            auditors: true,
+            assets: true,
+            captures: true,
+            evidenceFiles: true,
+            findings: true,
+          },
+        },
+      },
+    });
+
+    return mapCampaignRecord(campaign);
+  },
+
+  async activate(id) {
+    const context = await getRequiredAuthContext();
+
+    const existing = await prisma.campaign.findFirst({
+      where: {
+        id,
+        tenantId: context.tenantId,
+      },
+      include: {
+        client: true,
+        _count: {
+          select: {
+            auditors: true,
+            assets: true,
+            captures: true,
+            evidenceFiles: true,
+            findings: true,
+          },
+        },
+      },
+    });
+
+    if (!existing) {
+      return null;
+    }
+
+    if (existing.status === "ACTIVE") {
+      return mapCampaignRecord(existing);
+    }
+
+    const campaign = await prisma.campaign.update({
+      where: {
+        id: existing.id,
+      },
+      data: {
+        status: "ACTIVE",
+        startedAt: existing.startedAt ?? new Date(),
       },
       include: {
         client: true,
