@@ -21,20 +21,20 @@ export function FeatureCard({
     <Panel className="flex h-full flex-col justify-between gap-8" glow>
       <div className="space-y-4">
         {eyebrow ? (
-          <span className="text-xs font-semibold uppercase tracking-[0.28em] text-emerald-300/72">
+          <span className="text-xs font-semibold uppercase tracking-[0.24em] text-[#667085]">
             {eyebrow}
           </span>
         ) : null}
         <div className="space-y-3">
-          <h3 className="text-2xl font-semibold tracking-[-0.03em] text-white">
+          <h3 className="text-2xl font-semibold tracking-[-0.03em] text-[#14375a]">
             {title}
           </h3>
-          <p className="text-sm leading-7 text-white/62">{description}</p>
+          <p className="text-sm leading-7 text-[#667085]">{description}</p>
         </div>
       </div>
       {visual ? <div>{visual}</div> : null}
       {footer ? (
-        <div className="border-t border-white/8 pt-4 text-sm text-white/52">
+        <div className="border-t border-[#eef2f7] pt-4 text-sm text-[#667085]">
           {footer}
         </div>
       ) : null}

@@ -1,6 +1,6 @@
 import "server-only";
 
-import type { Prisma } from "@prisma/client";
+import { Prisma } from "@prisma/client";
 
 import type { Asset, CreateAssetDraft } from "@/src/features/assets/domain/asset";
 import { getRequiredAuthContext } from "@/src/features/auth/auth-context";
@@ -8,10 +8,18 @@ import { prisma } from "@/src/lib/db/prisma";
 
 export type AssetRepository = {
   listByCampaignId(campaignId: string): Promise<Asset[]>;
+  countManualByCampaignId(campaignId: string): Promise<number>;
   getById(campaignId: string, assetId: string): Promise<Asset | null>;
   findByBarcodeOrTag(campaignId: string, code: string): Promise<Asset | null>;
   create(campaignId: string, input: CreateAssetDraft): Promise<Asset>;
 };
+
+export class DuplicateAssetError extends Error {
+  constructor() {
+    super("Duplicate asset");
+    this.name = "DuplicateAssetError";
+  }
+}
 
 type AssetRecord = Prisma.AssetGetPayload<{
   include: {
@@ -98,6 +106,22 @@ export const assetRepository: AssetRepository = {
     return assets.map(mapAssetRecord);
   },
 
+  async countManualByCampaignId(campaignId) {
+    const scope = await requireCampaignScope(campaignId);
+
+    if (!scope) {
+      return 0;
+    }
+
+    return prisma.asset.count({
+      where: {
+        tenantId: scope.tenantId,
+        campaignId: scope.campaignId,
+        assetMasterRowId: null,
+      },
+    });
+  },
+
   async getById(campaignId, assetId) {
     const scope = await requireCampaignScope(campaignId);
 
@@ -167,29 +191,40 @@ export const assetRepository: AssetRepository = {
       throw new Error("Campaign not found for current organization.");
     }
 
-    const asset = await prisma.asset.create({
-      data: {
-        tenantId: scope.tenantId,
-        campaignId: scope.campaignId,
-        assetTag: input.assetTag,
-        barcode: input.barcode || null,
-        name: input.name,
-        serialNumber: input.serialNumber || null,
-        location: input.location || null,
-        responsible: input.responsible || null,
-        costCenter: input.costCenter || null,
-      },
-      include: {
-        _count: {
-          select: {
-            captures: true,
-            evidenceFiles: true,
-            findings: true,
+    try {
+      const asset = await prisma.asset.create({
+        data: {
+          tenantId: scope.tenantId,
+          campaignId: scope.campaignId,
+          assetTag: input.assetTag,
+          barcode: input.barcode || null,
+          name: input.name,
+          serialNumber: input.serialNumber || null,
+          location: input.location || null,
+          responsible: input.responsible || null,
+          costCenter: input.costCenter || null,
+        },
+        include: {
+          _count: {
+            select: {
+              captures: true,
+              evidenceFiles: true,
+              findings: true,
+            },
           },
         },
-      },
-    });
+      });
 
-    return mapAssetRecord(asset);
+      return mapAssetRecord(asset);
+    } catch (error) {
+      if (
+        error instanceof Prisma.PrismaClientKnownRequestError &&
+        error.code === "P2002"
+      ) {
+        throw new DuplicateAssetError();
+      }
+
+      throw error;
+    }
   },
 };

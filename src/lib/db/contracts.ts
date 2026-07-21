@@ -13,9 +13,9 @@ export const campaignStatuses = ["DRAFT", "ACTIVE", "CLOSED"] as const;
 export type CampaignStatus = (typeof campaignStatuses)[number];
 
 export const inventoryModes = [
-  "FULL_COUNT",
-  "SELECTIVE",
-  "CYCLE_COUNT",
+  "SIMPLE_COUNT",
+  "FULL_AUDIT",
+  "CUSTOM",
 ] as const;
 
 export type InventoryMode = (typeof inventoryModes)[number];
@@ -26,6 +26,7 @@ export const campaignFieldDataTypes = [
   "DATE",
   "BOOLEAN",
   "SELECT",
+  "FILE",
 ] as const;
 
 export type CampaignFieldDataType = (typeof campaignFieldDataTypes)[number];

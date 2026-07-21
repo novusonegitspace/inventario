@@ -9,10 +9,10 @@ import { cn } from "@/src/shared/lib/cn";
 
 const variantClasses = {
   primary:
-    "bg-emerald-400 text-slate-950 shadow-[0_18px_50px_rgba(74,222,128,0.35)] hover:bg-emerald-300",
+    "bg-[#0f988c] text-white shadow-[0_16px_32px_rgba(15,152,140,0.22)] hover:bg-[#087e75]",
   secondary:
-    "border border-white/10 bg-white/8 text-white hover:border-emerald-300/30 hover:bg-white/12",
-  ghost: "text-white/72 hover:bg-white/6 hover:text-white",
+    "border border-[#e4e7eb] bg-white text-[#14375a] hover:bg-[#f7f8fa]",
+  ghost: "text-[#667085] hover:bg-[#f7f8fa] hover:text-[#14375a]",
 } as const;
 
 const sizeClasses = {
@@ -54,8 +54,8 @@ export function Button(props: ButtonProps) {
     } = props as ButtonAsLink;
 
     const classes = cn(
-      "inline-flex items-center justify-center rounded-full font-semibold transition duration-200",
-      "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300/70 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950",
+      "inline-flex items-center justify-center rounded-lg font-semibold transition duration-200",
+      "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#16b8ac]/40 focus-visible:ring-offset-2 focus-visible:ring-offset-white",
       fullWidth && "w-full",
       sizeClasses[size],
       variantClasses[variant],
@@ -80,9 +80,9 @@ export function Button(props: ButtonProps) {
   } = props as ButtonAsButton;
 
   const classes = cn(
-    "inline-flex items-center justify-center rounded-full font-semibold transition duration-200",
-    "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300/70 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950",
-    "disabled:cursor-not-allowed disabled:opacity-45 disabled:hover:border-white/10 disabled:hover:bg-white/8 disabled:hover:text-white",
+    "inline-flex items-center justify-center rounded-lg font-semibold transition duration-200",
+    "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#16b8ac]/40 focus-visible:ring-offset-2 focus-visible:ring-offset-white",
+    "disabled:cursor-not-allowed disabled:opacity-45",
     fullWidth && "w-full",
     sizeClasses[size],
     variantClasses[variant],

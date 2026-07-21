@@ -1,9 +1,12 @@
+import { countManualAssets } from "@/src/features/assets/application/count-manual-assets";
 import { getAssetsOverview, listAssets } from "@/src/features/assets/application/list-assets";
 import { AssetForm } from "@/src/features/assets/ui/asset-form";
 import { AssetList } from "@/src/features/assets/ui/asset-list";
 import { getCampaignDetail } from "@/src/features/campaigns/application/get-campaign-detail";
 import { canEditCampaign } from "@/src/features/campaigns/domain/campaign-status";
 import { CampaignStatusBadge } from "@/src/features/campaigns/ui/campaign-status-badge";
+import { CampaignWorkspaceNav } from "@/src/features/campaigns/ui/campaign-workspace-nav";
+import { getCaptureSettings } from "@/src/features/campaign-settings/application/get-capture-settings";
 import { Badge } from "@/src/shared/ui/badge";
 import { Button } from "@/src/shared/ui/button";
 import { Panel } from "@/src/shared/ui/panel";
@@ -16,20 +19,22 @@ export default async function CampaignAssetsPage({
   params: Promise<{ campaignId: string }>;
 }) {
   const { campaignId } = await params;
-  const [campaign, assets, overview] = await Promise.all([
+  const [campaign, assets, overview, captureSettings, manualAssetCount] = await Promise.all([
     getCampaignDetail(campaignId),
     listAssets(campaignId),
     getAssetsOverview(campaignId),
+    getCaptureSettings(campaignId),
+    countManualAssets(campaignId),
   ]);
 
   if (!campaign) {
     return (
       <main className="mx-auto flex w-full max-w-[1100px] flex-1 flex-col gap-8 px-4 py-6 sm:px-6 lg:px-8">
         <Panel className="space-y-5" glow padding="lg">
-          <h1 className="text-4xl font-semibold tracking-[-0.06em] text-white">
+          <h1 className="text-4xl font-semibold tracking-[-0.06em] text-[#2d2d2d]">
             No encontramos la campaña solicitada
           </h1>
-          <p className="max-w-2xl text-base leading-7 text-white/60">
+          <p className="max-w-2xl text-base leading-7 text-[#667085]">
             Vuelva al listado y seleccione una campaña disponible para revisar
             o registrar activos.
           </p>
@@ -40,11 +45,18 @@ export default async function CampaignAssetsPage({
   }
 
   const canEdit = canEditCampaign(campaign.status);
+  const manualLimit = captureSettings?.manualAssetLimit ?? null;
+  const manualRestrictionMessage =
+    captureSettings?.assetManagementMethod === "bulk_only"
+      ? "Esta campaña usa maestro de activos. Para incorporar activos, cargue el archivo maestro desde Configuración de toma física."
+      : manualLimit !== null && manualAssetCount >= manualLimit
+        ? `Esta campaña ya alcanzó el límite de ${manualLimit} activos manuales. Cambie la configuración o use carga maestra.`
+        : undefined;
 
   return (
-    <main className="mx-auto flex w-full max-w-[1680px] flex-1 flex-col gap-10 px-4 py-6 sm:px-6 lg:px-8">
+    <main className="flex w-full flex-1 flex-col gap-8">
       <Panel className="space-y-6" padding="lg">
-        <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+        <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
           <div className="space-y-4">
             <div className="flex flex-wrap items-center gap-3">
               <CampaignStatusBadge status={campaign.status} />
@@ -52,10 +64,10 @@ export default async function CampaignAssetsPage({
               <Badge tone="slate">Activos</Badge>
             </div>
             <div className="space-y-2">
-              <h1 className="text-4xl font-semibold tracking-[-0.06em] text-white sm:text-5xl">
+              <h1 className="text-4xl font-semibold tracking-[-0.06em] text-[#2d2d2d] sm:text-5xl">
                 {campaign.name}
               </h1>
-              <p className="max-w-3xl text-base leading-7 text-white/62">
+              <p className="max-w-3xl text-base leading-7 text-[#667085]">
                 Organice el maestro de activos de la campaña, revise
                 responsables y prepare el inventario antes de la captura en
                 terreno.
@@ -67,11 +79,15 @@ export default async function CampaignAssetsPage({
             <Button href={`/campaigns/${campaign.id}`} size="sm" variant="secondary">
               Volver a campaña
             </Button>
-            <Button href="#nuevo-activo" size="sm">
-              Nuevo activo
-            </Button>
+            {captureSettings?.assetManagementMethod === "bulk_only" ? (
+              <Button href={`/campaigns/${campaign.id}/settings`} size="sm">
+                Cargar maestro
+              </Button>
+            ) : null}
           </div>
         </div>
+
+        <CampaignWorkspaceNav campaignId={campaign.id} />
       </Panel>
 
       <section className="grid gap-6 lg:grid-cols-4">
@@ -118,17 +134,21 @@ export default async function CampaignAssetsPage({
 
         {!canEdit ? (
           <Panel className="space-y-3" padding="lg">
-            <h2 className="text-2xl font-semibold tracking-[-0.04em] text-white">
+            <h2 className="text-2xl font-semibold tracking-[-0.04em] text-[#2d2d2d]">
               La campaña está cerrada
             </h2>
-            <p className="text-sm leading-7 text-white/60">
+            <p className="text-sm leading-7 text-[#667085]">
               No es posible agregar nuevos activos porque la campaña ya fue
               cerrada.
             </p>
           </Panel>
         ) : null}
 
-        <AssetForm campaignId={campaign.id} canEdit={canEdit} />
+        <AssetForm
+          campaignId={campaign.id}
+          canEdit={canEdit}
+          manualRestrictionMessage={manualRestrictionMessage}
+        />
       </section>
     </main>
   );

@@ -55,10 +55,15 @@ export async function createCampaignAction(
     name: formData.get("name"),
     code: formData.get("code"),
     clientName: formData.get("clientName"),
+    description: formData.get("description"),
     siteName: formData.get("siteName"),
     inventoryMode: formData.get("inventoryMode"),
     scheduledStartAt: formData.get("scheduledStartAt"),
     scheduledEndAt: formData.get("scheduledEndAt"),
+    captureRequiresPhoto: formData.get("captureRequiresPhoto"),
+    captureRequiresGeo: formData.get("captureRequiresGeo"),
+    allowManualAssets: formData.get("allowManualAssets"),
+    closeBlocksCaptures: formData.get("closeBlocksCaptures"),
   });
 
   if (!result.ok) {
@@ -68,7 +73,7 @@ export async function createCampaignAction(
     };
   }
 
-  redirect(`/campaigns/${result.campaignId}`);
+  redirect(`/campaigns/${result.campaignId}/settings`);
 }
 
 export async function updateCampaignSettingsAction(

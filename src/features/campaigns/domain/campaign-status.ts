@@ -1,4 +1,10 @@
-export const campaignStatuses = ["draft", "active", "closed"] as const;
+export const campaignStatuses = [
+  "draft",
+  "active",
+  "in_review",
+  "completed",
+  "closed",
+] as const;
 
 export type CampaignStatus = (typeof campaignStatuses)[number];
 
@@ -12,17 +18,31 @@ export type CampaignStatusMeta = {
 
 const campaignStatusMeta: Record<CampaignStatus, CampaignStatusMeta> = {
   draft: {
-    label: "Preparación",
+    label: "Borrador",
     description: "La campaña todavía se está preparando.",
     tone: "slate",
     allowsCapture: false,
     allowsEditing: true,
   },
   active: {
-    label: "En curso",
+    label: "Activa",
     description: "La operación está en terreno y acepta capturas.",
     tone: "emerald",
     allowsCapture: true,
+    allowsEditing: true,
+  },
+  in_review: {
+    label: "En revisión",
+    description: "La campaña está en revisión y restringe cambios operativos.",
+    tone: "outline",
+    allowsCapture: false,
+    allowsEditing: true,
+  },
+  completed: {
+    label: "Completada",
+    description: "La ejecución terminó y queda lista para reporte o cierre.",
+    tone: "outline",
+    allowsCapture: false,
     allowsEditing: true,
   },
   closed: {

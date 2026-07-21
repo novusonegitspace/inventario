@@ -16,6 +16,7 @@ export type AssetCapture = {
   observedCostCenter: string;
   observedSerialNumber: string;
   conditionNotes: string;
+  customFields: Record<string, string>;
 };
 
 export type CreateAssetCaptureDraft = {
@@ -30,6 +31,7 @@ export type CreateAssetCaptureDraft = {
   observedCostCenter: string;
   observedSerialNumber: string;
   conditionNotes: string;
+  customFields: Record<string, string>;
 };
 
 export const defaultAssetCaptureDraft: CreateAssetCaptureDraft = {
@@ -44,4 +46,5 @@ export const defaultAssetCaptureDraft: CreateAssetCaptureDraft = {
   observedCostCenter: "",
   observedSerialNumber: "",
   conditionNotes: "",
+  customFields: {},
 };

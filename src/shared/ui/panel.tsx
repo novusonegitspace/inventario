@@ -23,9 +23,9 @@ export function Panel({
   return (
     <div
       className={cn(
-        "rounded-[28px] border border-white/10 bg-slate-950/72 backdrop-blur-xl",
-        "shadow-[0_24px_80px_rgba(3,7,18,0.45)]",
-        glow && "shadow-[0_24px_80px_rgba(74,222,128,0.12)]",
+        "rounded-lg border border-[#e4e7eb] bg-white",
+        "shadow-[0_18px_48px_rgba(20,55,90,0.08)]",
+        glow && "shadow-[0_18px_48px_rgba(20,55,90,0.10)]",
         paddingClasses[padding],
         className,
       )}

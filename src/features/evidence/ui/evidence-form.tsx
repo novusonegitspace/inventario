@@ -55,10 +55,10 @@ export function EvidenceForm({
       <div className="space-y-3">
         <Badge>Respaldo documental</Badge>
         <div className="space-y-2">
-          <h2 className="text-3xl font-semibold tracking-[-0.05em] text-white">
+          <h2 className="text-3xl font-semibold tracking-[-0.05em] text-[#2d2d2d]">
             Adjunte un archivo a una captura ya registrada
           </h2>
-          <p className="text-sm leading-7 text-white/60">
+          <p className="text-sm leading-7 text-[#667085]">
             Seleccione la captura correspondiente y cargue una foto o archivo
             relacionado con la validación del activo.
           </p>
@@ -67,11 +67,11 @@ export function EvidenceForm({
 
       <form action={formAction} className="grid gap-5">
         <div className="space-y-2">
-          <label className="text-sm font-medium text-white/72" htmlFor="captureId">
+          <label className="text-sm font-semibold text-[#344054]" htmlFor="captureId">
             Captura relacionada
           </label>
           <select
-            className="h-13 w-full rounded-2xl border border-white/10 bg-slate-950 px-4 text-white outline-none transition focus:border-emerald-300/50 disabled:opacity-60"
+            className="h-12 w-full rounded-lg border border-[#d6deea] bg-white px-4 text-[#14375a] outline-none transition focus:border-[#16b8ac] disabled:cursor-not-allowed disabled:bg-[#f7f8fa] disabled:text-[#98a2b3]"
             defaultValue={values.captureId}
             disabled={!canEdit || captures.length === 0}
             id="captureId"
@@ -91,28 +91,28 @@ export function EvidenceForm({
             ))}
           </select>
           {errors?.captureId ? (
-            <p className="text-sm text-rose-200">{errors.captureId}</p>
+            <p className="text-sm font-semibold text-[#d92d20]">{errors.captureId}</p>
           ) : null}
         </div>
 
         <div className="space-y-2">
-          <label className="text-sm font-medium text-white/72" htmlFor="file">
+          <label className="text-sm font-semibold text-[#344054]" htmlFor="file">
             Archivo de respaldo
           </label>
           <input
-            className="block w-full rounded-2xl border border-white/10 bg-white/6 px-4 py-4 text-sm text-white file:mr-4 file:rounded-full file:border-0 file:bg-emerald-300 file:px-4 file:py-2 file:font-semibold file:text-slate-950 disabled:opacity-60"
+            className="block w-full rounded-lg border border-[#d6deea] bg-white px-4 py-4 text-sm text-[#14375a] file:mr-4 file:rounded-lg file:border-0 file:bg-[#0f988c] file:px-4 file:py-2 file:font-semibold file:text-white disabled:cursor-not-allowed disabled:bg-[#f7f8fa] disabled:text-[#98a2b3]"
             disabled={!canEdit || captures.length === 0}
             id="file"
             name="file"
             type="file"
           />
           {errors?.file ? (
-            <p className="text-sm text-rose-200">{errors.file}</p>
+            <p className="text-sm font-semibold text-[#d92d20]">{errors.file}</p>
           ) : null}
         </div>
 
         {errors?.form ? (
-          <div className="rounded-2xl border border-rose-400/24 bg-rose-400/10 px-4 py-3 text-sm text-rose-100">
+          <div className="rounded-lg border border-[#fda29b] bg-[#fff1f1] px-4 py-3 text-sm font-semibold text-[#b42318]">
             {errors.form}
           </div>
         ) : null}

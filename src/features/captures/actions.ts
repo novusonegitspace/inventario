@@ -22,6 +22,16 @@ export async function createAssetCaptureAction(
   _state: CreateAssetCaptureFormState,
   formData: FormData,
 ): Promise<CreateAssetCaptureFormState> {
+  const customFields = Object.fromEntries(
+    Array.from(formData.entries())
+      .filter(([key]) => key.startsWith("customField:"))
+      .map(([key, value]) => [
+        key.replace("customField:", ""),
+        String(value ?? "").trim(),
+      ])
+      .filter(([, value]) => value.length > 0),
+  );
+
   const result = await createAssetCapture(campaignId, assetId, {
     scannedCode: formData.get("scannedCode"),
     latitude: formData.get("latitude"),
@@ -34,6 +44,8 @@ export async function createAssetCaptureAction(
     observedCostCenter: formData.get("observedCostCenter"),
     observedSerialNumber: formData.get("observedSerialNumber"),
     conditionNotes: formData.get("conditionNotes"),
+    customFields,
+    evidenceFile: formData.get("evidenceFile"),
   });
 
   if (!result.ok) {

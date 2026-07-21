@@ -182,7 +182,7 @@ export function MobileBarcodeScanner({
             <Badge>Escaneo con cámara</Badge>
             {isActive ? <Badge tone="emerald">En vivo</Badge> : null}
           </div>
-          <p className="max-w-2xl text-sm leading-7 text-white/60">
+          <p className="max-w-2xl text-sm leading-7 text-[#667085]">
             Abra la cámara trasera del teléfono y lea el código directamente en
             terreno. Al detectar el barcode, el valor se cargará en el formulario.
           </p>
@@ -215,7 +215,7 @@ export function MobileBarcodeScanner({
       </div>
 
       <div className="grid gap-5 lg:grid-cols-[1.2fr_0.8fr]">
-        <div className="scan-device relative overflow-hidden rounded-[30px] border border-white/10 bg-slate-950/70 p-3">
+        <div className="scan-device relative overflow-hidden rounded-[30px] border border-[#14375a]/20 bg-[#071524] p-3">
           <video
             ref={videoRef}
             autoPlay
@@ -237,11 +237,11 @@ export function MobileBarcodeScanner({
         </div>
 
         <div className="space-y-4">
-          <div className="rounded-[24px] border border-white/8 bg-black/18 p-5">
-            <p className="text-xs uppercase tracking-[0.22em] text-white/40">
+          <div className="rounded-lg border border-[#e4e7eb] bg-[#f7f8fa] p-5">
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#667085]">
               Estado
             </p>
-            <p className="mt-2 text-lg font-semibold text-white">
+            <p className="mt-2 text-lg font-semibold text-[#14375a]">
               {disabled
                 ? "La campaña todavía no admite captura móvil."
                 : isActive
@@ -250,17 +250,17 @@ export function MobileBarcodeScanner({
             </p>
           </div>
 
-          <div className="rounded-[24px] border border-white/8 bg-black/18 p-5">
-            <p className="text-xs uppercase tracking-[0.22em] text-white/40">
+          <div className="rounded-lg border border-[#e4e7eb] bg-[#f7f8fa] p-5">
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#667085]">
               Último código
             </p>
-            <p className="mt-2 break-all text-lg font-semibold text-white">
+            <p className="mt-2 break-all text-lg font-semibold text-[#14375a]">
               {lastCode || "Todavía no se ha detectado ningún barcode."}
             </p>
           </div>
 
-          <div className="rounded-[24px] border border-white/8 bg-black/18 p-5">
-            <p className="text-sm leading-7 text-white/60">
+          <div className="rounded-lg border border-[#d6e9ff] bg-[#eff6ff] p-5">
+            <p className="text-sm leading-7 text-[#2e72d2]">
               {disabled
                 ? "Primero inicie la campaña para habilitar el flujo de terreno. Luego la cámara quedará disponible en esta pantalla."
                 : "En navegador móvil la cámara suele exigir HTTPS o `localhost`. Si está probando desde otra IP local, el permiso puede ser rechazado por el propio navegador."}
@@ -268,7 +268,7 @@ export function MobileBarcodeScanner({
           </div>
 
           {error ? (
-            <div className="rounded-2xl border border-rose-400/24 bg-rose-400/10 px-4 py-3 text-sm text-rose-100">
+            <div className="rounded-lg border border-[#fda29b] bg-[#fff1f1] px-4 py-3 text-sm font-semibold text-[#b42318]">
               {error}
             </div>
           ) : null}

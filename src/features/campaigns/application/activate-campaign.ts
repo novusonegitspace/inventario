@@ -23,6 +23,14 @@ export async function activateCampaign(
     };
   }
 
+  if (campaign.status === "in_review" || campaign.status === "completed") {
+    return {
+      ok: false,
+      message:
+        "La campaña ya salió de ejecución. Requiere una reapertura explícita para volver a captura.",
+    };
+  }
+
   const updatedCampaign = await campaignRepository.activate(campaignId);
 
   if (!updatedCampaign) {

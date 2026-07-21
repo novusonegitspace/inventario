@@ -28,6 +28,10 @@ function isInventoryMode(value: string): value is InventoryMode {
   return inventoryModes.includes(value as InventoryMode);
 }
 
+function toBoolean(value: FormDataEntryValue | null | undefined) {
+  return value === "on" || value === "true" || value === "1";
+}
+
 export async function createCampaign(
   input: Partial<Record<keyof CreateCampaignDraft, FormDataEntryValue | null>>,
 ): Promise<CreateCampaignResult> {
@@ -36,12 +40,17 @@ export async function createCampaign(
     name: String(input.name ?? "").trim(),
     code: normalizeCampaignCode(String(input.code ?? "")),
     clientName: String(input.clientName ?? "").trim(),
+    description: String(input.description ?? "").trim(),
     siteName: String(input.siteName ?? "").trim(),
     inventoryMode: isInventoryMode(String(input.inventoryMode ?? ""))
       ? String(input.inventoryMode) as InventoryMode
       : defaultCampaignDraft.inventoryMode,
     scheduledStartAt: String(input.scheduledStartAt ?? "").trim(),
     scheduledEndAt: String(input.scheduledEndAt ?? "").trim(),
+    captureRequiresPhoto: toBoolean(input.captureRequiresPhoto ?? null),
+    captureRequiresGeo: toBoolean(input.captureRequiresGeo ?? null),
+    allowManualAssets: toBoolean(input.allowManualAssets ?? null),
+    closeBlocksCaptures: toBoolean(input.closeBlocksCaptures ?? null),
   };
 
   const errors: CreateCampaignFormErrors = {};

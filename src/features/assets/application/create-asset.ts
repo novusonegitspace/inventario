@@ -1,12 +1,16 @@
 import { getCampaignDetail } from "@/src/features/campaigns/application/get-campaign-detail";
 import { canEditCampaign } from "@/src/features/campaigns/domain/campaign-status";
+import { getCaptureSettings } from "@/src/features/campaign-settings/application/get-capture-settings";
 import {
   defaultAssetDraft,
   normalizeBarcode,
   normalizeAssetTag,
   type CreateAssetDraft,
 } from "@/src/features/assets/domain/asset";
-import { assetRepository } from "@/src/features/assets/infrastructure/asset-repository";
+import {
+  DuplicateAssetError,
+  assetRepository,
+} from "@/src/features/assets/infrastructure/asset-repository";
 
 export type CreateAssetErrors = Partial<Record<keyof CreateAssetDraft, string>> & {
   form?: string;
@@ -40,12 +44,33 @@ export async function createAsset(
   };
 
   const errors: CreateAssetErrors = {};
-  const campaign = await getCampaignDetail(campaignId);
+  const [campaign, captureSettings] = await Promise.all([
+    getCampaignDetail(campaignId),
+    getCaptureSettings(campaignId),
+  ]);
 
   if (!campaign) {
     errors.form = "No encontramos la campaña seleccionada.";
   } else if (!canEditCampaign(campaign.status)) {
     errors.form = "La campaña está cerrada y no admite nuevos activos.";
+  }
+
+  if (campaign && captureSettings?.assetManagementMethod === "bulk_only") {
+    errors.form =
+      "Esta campaña usa maestro de activos. Cargue el archivo maestro desde Configuración de toma física.";
+  }
+
+  if (
+    campaign &&
+    captureSettings?.manualAssetLimit !== null &&
+    captureSettings?.manualAssetLimit !== undefined &&
+    captureSettings.assetManagementMethod !== "bulk_only"
+  ) {
+    const manualAssetCount = await assetRepository.countManualByCampaignId(campaignId);
+
+    if (manualAssetCount >= captureSettings.manualAssetLimit) {
+      errors.form = `Esta campaña permite hasta ${captureSettings.manualAssetLimit} activos manuales. Use carga maestra o cambie la configuración.`;
+    }
   }
 
   if (values.assetTag.length < 3) {
@@ -71,13 +96,19 @@ export async function createAsset(
 
   const existingAssets = campaign ? await assetRepository.listByCampaignId(campaignId) : [];
 
-  if (existingAssets.some((asset) => asset.assetTag === values.assetTag)) {
+  if (
+    existingAssets.some(
+      (asset) => normalizeAssetTag(asset.assetTag) === values.assetTag,
+    )
+  ) {
     errors.assetTag = "Ya existe un activo con esa etiqueta en esta campaña.";
   }
 
   if (
     values.barcode &&
-    existingAssets.some((asset) => asset.barcode === values.barcode)
+    existingAssets.some(
+      (asset) => normalizeBarcode(asset.barcode) === values.barcode,
+    )
   ) {
     errors.barcode =
       "Ya existe un activo con ese código de barras en esta campaña.";
@@ -91,11 +122,25 @@ export async function createAsset(
     };
   }
 
-  const asset = await assetRepository.create(campaignId, values);
+  try {
+    const asset = await assetRepository.create(campaignId, values);
 
-  return {
-    ok: true,
-    assetId: asset.id,
-    values,
-  };
+    return {
+      ok: true,
+      assetId: asset.id,
+      values,
+    };
+  } catch (error) {
+    if (error instanceof DuplicateAssetError) {
+      return {
+        ok: false,
+        errors: {
+          form: "Ya existe un activo manual con una clave interna o etiqueta duplicada. Revise los datos e intente nuevamente.",
+        },
+        values,
+      };
+    }
+
+    throw error;
+  }
 }
