@@ -30,7 +30,7 @@ export default async function CampaignSettingsPage({
             listado principal.
           </p>
           <Link
-            className="mt-6 inline-flex h-11 items-center rounded-lg bg-[#0f988c] px-5 text-sm font-semibold text-white"
+            className="mt-6 inline-flex h-11 items-center rounded-lg bg-[#0f988c] px-5 text-sm font-semibold !text-white"
             href="/campaigns"
           >
             Volver a campañas
@@ -108,4 +108,3 @@ export default async function CampaignSettingsPage({
     </main>
   );
 }
-

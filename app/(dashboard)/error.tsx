@@ -71,7 +71,7 @@ export default function DashboardError({
 
         <div className="mt-6 flex flex-wrap gap-3">
           <button
-            className="inline-flex min-h-10 items-center justify-center rounded-lg bg-[#14375a] px-4 text-sm font-semibold text-white transition hover:bg-[#102e4d]"
+            className="inline-flex min-h-10 items-center justify-center rounded-lg bg-[#14375a] px-4 text-sm font-semibold !text-white transition hover:bg-[#102e4d]"
             onClick={() => reset()}
             type="button"
           >

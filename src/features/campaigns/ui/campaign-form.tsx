@@ -107,7 +107,7 @@ function SubmitButton() {
 
   return (
     <button
-      className="inline-flex h-12 items-center justify-center gap-2 rounded-lg bg-[#0f988c] px-6 text-base font-semibold text-white shadow-[0_16px_32px_rgba(15,152,140,0.22)] transition hover:bg-[#087e75] disabled:cursor-not-allowed disabled:opacity-60"
+      className="inline-flex h-12 items-center justify-center gap-2 rounded-lg bg-[#0f988c] px-6 text-base font-semibold !text-white shadow-[0_16px_32px_rgba(15,152,140,0.22)] transition hover:bg-[#087e75] disabled:cursor-not-allowed disabled:opacity-60"
       disabled={pending}
       type="submit"
     >
@@ -159,7 +159,7 @@ function StepRail({
                 className={cn(
                   "grid h-9 w-9 shrink-0 place-items-center rounded-full text-sm font-semibold",
                   isActive || isDone
-                    ? "bg-[#0f988c] text-white"
+                    ? "bg-[#0f988c] !text-white"
                     : "bg-[#d8e0ec] text-[#667085]",
                 )}
               >
@@ -693,7 +693,7 @@ export function CampaignForm() {
 
           {step < 2 ? (
             <button
-              className="inline-flex h-12 items-center justify-center gap-2 rounded-lg bg-[#0f988c] px-6 text-base font-semibold text-white shadow-[0_16px_32px_rgba(15,152,140,0.22)] transition hover:bg-[#087e75] disabled:cursor-not-allowed disabled:opacity-50"
+              className="inline-flex h-12 items-center justify-center gap-2 rounded-lg bg-[#0f988c] px-6 text-base font-semibold !text-white shadow-[0_16px_32px_rgba(15,152,140,0.22)] transition hover:bg-[#087e75] disabled:cursor-not-allowed disabled:opacity-50"
               disabled={step === 0 && !stepOneReady}
               onClick={goNext}
               type="button"

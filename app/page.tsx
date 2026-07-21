@@ -50,7 +50,7 @@ export default async function Home() {
               <div className="flex flex-col gap-3 sm:flex-row">
                 <a
                   href={dashboardHref}
-                  className="inline-flex min-h-11 items-center justify-center rounded-lg bg-[#14375a] px-5 text-sm font-semibold text-white transition hover:bg-[#102e4d]"
+                  className="inline-flex min-h-11 items-center justify-center rounded-lg bg-[#14375a] px-5 text-sm font-semibold !text-white transition hover:bg-[#102e4d]"
                 >
                   {session ? "Abrir dashboard" : "Entrar al dashboard"}
                 </a>

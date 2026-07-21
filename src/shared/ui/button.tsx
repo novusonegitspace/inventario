@@ -9,7 +9,7 @@ import { cn } from "@/src/shared/lib/cn";
 
 const variantClasses = {
   primary:
-    "bg-[#0f988c] text-white shadow-[0_16px_32px_rgba(15,152,140,0.22)] hover:bg-[#087e75]",
+    "bg-[#0f988c] !text-white shadow-[0_16px_32px_rgba(15,152,140,0.22)] hover:bg-[#087e75]",
   secondary:
     "border border-[#e4e7eb] bg-white text-[#14375a] hover:bg-[#f7f8fa]",
   ghost: "text-[#667085] hover:bg-[#f7f8fa] hover:text-[#14375a]",
