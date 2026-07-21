@@ -100,7 +100,7 @@ export function EvidenceForm({
             Archivo de respaldo
           </label>
           <input
-            className="block w-full rounded-lg border border-[#d6deea] bg-white px-4 py-4 text-sm text-[#14375a] file:mr-4 file:rounded-lg file:border-0 file:bg-[#0f988c] file:px-4 file:py-2 file:font-semibold file:text-white disabled:cursor-not-allowed disabled:bg-[#f7f8fa] disabled:text-[#98a2b3]"
+            className="block w-full rounded-lg border border-[#d6deea] bg-white px-4 py-4 text-sm text-[#14375a] file:mr-4 file:rounded-lg file:border-0 file:bg-[#0f988c] file:px-4 file:py-2 file:font-semibold file:!text-white disabled:cursor-not-allowed disabled:bg-[#f7f8fa] disabled:text-[#98a2b3]"
             disabled={!canEdit || captures.length === 0}
             id="file"
             name="file"

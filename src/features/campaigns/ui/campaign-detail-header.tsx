@@ -63,7 +63,7 @@ export function CampaignDetailHeader({ campaign }: { campaign: Campaign }) {
           <MvpSecondaryLink href="/campaigns">Volver al listado</MvpSecondaryLink>
           {campaign.status === "draft" ? (
             <form action={activateAction}>
-              <button className="inline-flex min-h-10 items-center justify-center rounded-lg bg-[#14375a] px-4 text-sm font-semibold text-white transition hover:bg-[#102e4d]" type="submit">
+              <button className="inline-flex min-h-10 items-center justify-center rounded-lg bg-[#14375a] px-4 text-sm font-semibold !text-white transition hover:bg-[#102e4d]" type="submit">
                 Iniciar campaña
               </button>
             </form>
@@ -72,7 +72,7 @@ export function CampaignDetailHeader({ campaign }: { campaign: Campaign }) {
               href="#next-modules"
               className={
                 allowsCapture
-                  ? "inline-flex min-h-10 items-center justify-center rounded-lg bg-[#14375a] px-4 text-sm font-semibold text-white transition hover:bg-[#102e4d]"
+                  ? "inline-flex min-h-10 items-center justify-center rounded-lg bg-[#14375a] px-4 text-sm font-semibold !text-white transition hover:bg-[#102e4d]"
                   : "inline-flex min-h-10 items-center justify-center rounded-lg border border-[#e4e7eb] bg-white px-4 text-sm font-semibold text-[#14375a] transition hover:bg-[#f7f8fa]"
               }
             >

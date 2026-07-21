@@ -159,7 +159,7 @@ function SubmitButton({ disabled }: { disabled: boolean }) {
 
   return (
     <button
-      className="inline-flex h-12 items-center justify-center gap-2 rounded-lg bg-[#0f988c] px-6 text-sm font-semibold text-white shadow-[0_16px_32px_rgba(15,152,140,0.24)] transition hover:bg-[#0b7f75] disabled:cursor-not-allowed disabled:opacity-50"
+      className="inline-flex h-12 items-center justify-center gap-2 rounded-lg bg-[#0f988c] px-6 text-sm font-semibold !text-white shadow-[0_16px_32px_rgba(15,152,140,0.24)] transition hover:bg-[#0b7f75] disabled:cursor-not-allowed disabled:opacity-50"
       disabled={disabled || pending}
       type="submit"
     >
@@ -174,7 +174,7 @@ function ImportMasterButton({ disabled }: { disabled: boolean }) {
 
   return (
     <button
-      className="h-11 rounded-lg bg-[#0f988c] px-5 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-50"
+      className="h-11 rounded-lg bg-[#0f988c] px-5 text-sm font-semibold !text-white disabled:cursor-not-allowed disabled:opacity-50"
       disabled={disabled || pending}
       type="submit"
     >
@@ -188,7 +188,7 @@ function ManualAssetSubmitButton({ disabled }: { disabled: boolean }) {
 
   return (
     <button
-      className="h-11 rounded-lg bg-[#0f988c] px-5 text-sm font-semibold text-white shadow-[0_14px_28px_rgba(15,152,140,0.22)] transition hover:bg-[#0b7f75] disabled:cursor-not-allowed disabled:opacity-50"
+      className="h-11 rounded-lg bg-[#0f988c] px-5 text-sm font-semibold !text-white shadow-[0_14px_28px_rgba(15,152,140,0.22)] transition hover:bg-[#0b7f75] disabled:cursor-not-allowed disabled:opacity-50"
       disabled={disabled || pending}
       type="submit"
     >
@@ -948,7 +948,7 @@ function CustomFieldModal({
           <button className="h-11 rounded-lg border border-[#d6deea] px-5 text-sm font-semibold text-[#46618a]" onClick={onClose} type="button">
             Cancelar
           </button>
-          <button className="h-11 rounded-lg bg-[#0f988c] px-5 text-sm font-semibold text-white" onClick={handleSave} type="button">
+          <button className="h-11 rounded-lg bg-[#0f988c] px-5 text-sm font-semibold !text-white" onClick={handleSave} type="button">
             Guardar campo
           </button>
         </div>
@@ -1275,7 +1275,7 @@ export function PhysicalCaptureSettingsForm({
                           className={cn(
                             "rounded-lg border px-4 py-2 text-sm font-semibold",
                             index === 0
-                              ? "border-[#0f988c] bg-[#0f988c] text-white"
+                              ? "border-[#0f988c] bg-[#0f988c] !text-white"
                               : "border-[#d6deea] bg-white text-[#46618a]",
                           )}
                           key={label}
