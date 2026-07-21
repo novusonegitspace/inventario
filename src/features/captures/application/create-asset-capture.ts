@@ -5,18 +5,29 @@ import {
 } from "@/src/features/assets/domain/asset";
 import { assetRepository } from "@/src/features/assets/infrastructure/asset-repository";
 import { getCampaignDetail } from "@/src/features/campaigns/application/get-campaign-detail";
-import { getCampaignSettings } from "@/src/features/campaigns/application/get-campaign-settings";
 import { canCaptureForCampaign } from "@/src/features/campaigns/domain/campaign-status";
+import { getCaptureSettings } from "@/src/features/campaign-settings/application/get-capture-settings";
+import type { CaptureField } from "@/src/features/campaign-settings/domain/capture-settings";
 import {
   defaultAssetCaptureDraft,
   type CreateAssetCaptureDraft,
 } from "@/src/features/captures/domain/asset-capture";
 import { captureRepository } from "@/src/features/captures/infrastructure/capture-repository";
+import { evidenceRepository } from "@/src/features/evidence/infrastructure/evidence-repository";
 
 export type CreateAssetCaptureErrors = Partial<
-  Record<keyof CreateAssetCaptureDraft, string>
+  Record<Exclude<keyof CreateAssetCaptureDraft, "customFields">, string>
 > & {
+  customFields?: Record<string, string>;
+  evidenceFile?: string;
   form?: string;
+};
+
+type CreateAssetCaptureInput = Partial<
+  Record<Exclude<keyof CreateAssetCaptureDraft, "customFields">, FormDataEntryValue | null>
+> & {
+  customFields?: Record<string, string>;
+  evidenceFile?: FormDataEntryValue | null;
 };
 
 export type CreateAssetCaptureResult =
@@ -41,10 +52,68 @@ function isFiniteCoordinate(value: string) {
   return Number.isFinite(parsed);
 }
 
+const dedicatedFieldNames: Record<
+  string,
+  Exclude<keyof CreateAssetCaptureDraft, "customFields">
+> = {
+  asset_code: "scannedCode",
+  notes: "notes",
+  observed_location: "observedLocation",
+  physical_condition: "physicalCondition",
+  observed_responsible: "observedResponsible",
+  serial_number: "observedSerialNumber",
+  cost_center: "observedCostCenter",
+};
+
+function isActiveMobileField(field: CaptureField) {
+  return field.showInMobileCapture && field.requirement !== "not_applicable";
+}
+
+function getFieldValue(field: CaptureField, values: CreateAssetCaptureDraft) {
+  const dedicatedFieldName = dedicatedFieldNames[field.key];
+
+  if (dedicatedFieldName) {
+    const value = values[dedicatedFieldName];
+    return typeof value === "string" ? value : "";
+  }
+
+  return values.customFields[field.key] ?? "";
+}
+
+function isRequiredFileField(field: CaptureField) {
+  return (
+    field.requirement === "required" &&
+    (field.dataType === "file" || field.key === "asset_photo")
+  );
+}
+
+function conditionRequiresNotes(rule: string, physicalCondition: string) {
+  if (rule === "always") {
+    return true;
+  }
+
+  if (rule !== "difference_or_bad_condition") {
+    return false;
+  }
+
+  const normalized = physicalCondition
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase();
+
+  return ["malo", "danado", "dañado", "damaged"].includes(normalized);
+}
+
+function getEvidenceFile(input: CreateAssetCaptureInput) {
+  return input.evidenceFile instanceof File && input.evidenceFile.size > 0
+    ? input.evidenceFile
+    : null;
+}
+
 export async function createAssetCapture(
   campaignId: string,
   assetId: string,
-  input: Partial<Record<keyof CreateAssetCaptureDraft, FormDataEntryValue | null>>,
+  input: CreateAssetCaptureInput,
 ): Promise<CreateAssetCaptureResult> {
   const values: CreateAssetCaptureDraft = {
     ...defaultAssetCaptureDraft,
@@ -59,13 +128,15 @@ export async function createAssetCapture(
     observedCostCenter: String(input.observedCostCenter ?? "").trim(),
     observedSerialNumber: String(input.observedSerialNumber ?? "").trim(),
     conditionNotes: String(input.conditionNotes ?? "").trim(),
+    customFields: input.customFields ?? {},
   };
+  const evidenceFile = getEvidenceFile(input);
 
   const errors: CreateAssetCaptureErrors = {};
   const [campaign, asset, settings] = await Promise.all([
     getCampaignDetail(campaignId),
     getAssetDetail(campaignId, assetId),
-    getCampaignSettings(campaignId),
+    getCaptureSettings(campaignId),
   ]);
 
   if (!campaign || !asset) {
@@ -98,9 +169,56 @@ export async function createAssetCapture(
     errors.longitude = "Ingrese una longitud válida.";
   }
 
-  if (settings?.captureRequiresGeo && (!values.latitude || !values.longitude)) {
+  const activeFields = settings?.fields.filter(isActiveMobileField) ?? [];
+  const fieldErrors: Record<string, string> = {};
+
+  for (const field of activeFields) {
+    if (isRequiredFileField(field)) {
+      continue;
+    }
+
+    if (field.requirement === "required" && !getFieldValue(field, values)) {
+      const dedicatedFieldName = dedicatedFieldNames[field.key];
+
+      if (dedicatedFieldName) {
+        errors[dedicatedFieldName as Exclude<keyof CreateAssetCaptureDraft, "customFields">] =
+          `Complete ${field.label.toLowerCase()}.`;
+      } else {
+        fieldErrors[field.key] = `Complete ${field.label.toLowerCase()}.`;
+      }
+    }
+  }
+
+  if (Object.keys(fieldErrors).length > 0) {
+    errors.customFields = fieldErrors;
+  }
+
+  const requiresGeo = activeFields.some(
+    (field) => field.key === "observed_location" && field.requirement === "required",
+  );
+
+  if (requiresGeo && (!values.latitude || !values.longitude)) {
     errors.latitude = "Esta campaña exige geolocalización.";
     errors.longitude = "Esta campaña exige geolocalización.";
+  }
+
+  const requiresEvidence =
+    settings?.primaryPhotoRequirement === "required" ||
+    activeFields.some(isRequiredFileField);
+
+  if (requiresEvidence && !evidenceFile) {
+    errors.evidenceFile = "Adjunte la foto o evidencia requerida para esta captura.";
+  }
+
+  if (
+    settings &&
+    conditionRequiresNotes(
+      settings.conditionRequiresObservationRule,
+      values.physicalCondition,
+    ) &&
+    !values.conditionNotes
+  ) {
+    errors.conditionNotes = "Esta condición requiere una observación de respaldo.";
   }
 
   if (Object.keys(errors).length > 0) {
@@ -112,6 +230,28 @@ export async function createAssetCapture(
   }
 
   const capture = await captureRepository.createForAsset(campaignId, assetId, values);
+
+  if (evidenceFile) {
+    try {
+      await evidenceRepository.createForAsset(
+        campaignId,
+        assetId,
+        capture.id,
+        evidenceFile,
+      );
+    } catch (error) {
+      return {
+        ok: false,
+        errors: {
+          form:
+            error instanceof Error
+              ? `La captura fue registrada, pero no pudimos adjuntar evidencia: ${error.message}`
+              : "La captura fue registrada, pero no pudimos adjuntar evidencia.",
+        },
+        values,
+      };
+    }
+  }
 
   return {
     ok: true,

@@ -25,15 +25,15 @@ export function SectionHeading({
       )}
     >
       {eyebrow ? (
-        <span className="text-sm font-semibold uppercase tracking-[0.3em] text-emerald-300/72">
+        <span className="text-xs font-semibold uppercase tracking-[0.24em] text-[#667085]">
           {eyebrow}
         </span>
       ) : null}
       <div className="space-y-3">
-        <h2 className="max-w-3xl text-3xl font-semibold tracking-[-0.04em] text-white sm:text-4xl">
+        <h2 className="max-w-3xl text-3xl font-semibold tracking-[-0.04em] text-[#2d2d2d] sm:text-4xl">
           {title}
         </h2>
-        <p className="max-w-2xl text-base leading-7 text-white/62 sm:text-lg">
+        <p className="max-w-2xl text-base leading-7 text-[#667085] sm:text-lg">
           {description}
         </p>
       </div>

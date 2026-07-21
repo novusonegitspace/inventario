@@ -23,10 +23,10 @@ export function AssetDetailHeader({
             {asset.serialNumber ? <Badge tone="slate">{asset.serialNumber}</Badge> : null}
           </div>
           <div className="space-y-2">
-            <h1 className="text-4xl font-semibold tracking-[-0.06em] text-white sm:text-5xl">
+            <h1 className="text-4xl font-semibold tracking-[-0.06em] text-[#2d2d2d] sm:text-5xl">
               {asset.name}
             </h1>
-            <p className="max-w-3xl text-base leading-7 text-white/62">
+            <p className="max-w-3xl text-base leading-7 text-[#667085]">
               Consulte la ubicación, el responsable y el estado de captura de
               este activo dentro de la campaña actual.
             </p>

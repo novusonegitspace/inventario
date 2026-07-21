@@ -10,7 +10,7 @@ export function LogoStrip({ items }: LogoStripProps) {
       {items.map((item) => (
         <div
           key={item}
-          className="flex items-center justify-center rounded-2xl border border-white/8 bg-white/4 px-4 py-5 text-sm font-semibold uppercase tracking-[0.22em] text-white/52"
+          className="flex items-center justify-center rounded-lg border border-[#e4e7eb] bg-[#f7f8fa] px-4 py-5 text-sm font-semibold uppercase tracking-[0.18em] text-[#667085]"
         >
           {item}
         </div>

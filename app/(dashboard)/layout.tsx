@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import type { ReactNode } from "react";
 
 import { getAuthSession } from "@/src/features/auth/session";
+import { MvpShell } from "@/src/shared/ui/mvp-shell";
 
 export default async function DashboardLayout({
   children,
@@ -14,5 +15,9 @@ export default async function DashboardLayout({
     redirect("/login");
   }
 
-  return children;
+  return (
+    <MvpShell sessionName={session.name} sessionRole={session.role}>
+      {children}
+    </MvpShell>
+  );
 }

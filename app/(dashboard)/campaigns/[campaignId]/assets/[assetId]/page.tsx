@@ -23,10 +23,10 @@ export default async function AssetDetailPage({
     return (
       <main className="mx-auto flex w-full max-w-[1100px] flex-1 flex-col gap-8 px-4 py-6 sm:px-6 lg:px-8">
         <Panel className="space-y-5" glow padding="lg">
-          <h1 className="text-4xl font-semibold tracking-[-0.06em] text-white">
+          <h1 className="text-4xl font-semibold tracking-[-0.06em] text-[#2d2d2d]">
             No encontramos este activo
           </h1>
-          <p className="max-w-2xl text-base leading-7 text-white/60">
+          <p className="max-w-2xl text-base leading-7 text-[#667085]">
             Revise el listado de activos de la campaña y vuelva a seleccionar el
             registro que desea consultar.
           </p>
@@ -81,33 +81,33 @@ export default async function AssetDetailPage({
             description="Mantenga estos datos actualizados para que la captura y la conciliación se apoyen en una referencia confiable."
           />
           <div className="grid gap-4 md:grid-cols-2">
-            <div className="rounded-[24px] border border-white/8 bg-black/24 p-5">
-              <p className="text-sm text-white/50">Código de barras</p>
-              <p className="mt-2 text-xl font-semibold text-white">
+            <div className="rounded-lg border border-[#e4e7eb] bg-[#f7f8fa] p-5">
+              <p className="text-sm text-[#667085]">Código de barras</p>
+              <p className="mt-2 text-xl font-semibold text-[#14375a]">
                 {asset.barcode || "Sin barcode registrado"}
               </p>
             </div>
-            <div className="rounded-[24px] border border-white/8 bg-black/24 p-5">
-              <p className="text-sm text-white/50">Etiqueta</p>
-              <p className="mt-2 text-xl font-semibold text-white">
+            <div className="rounded-lg border border-[#e4e7eb] bg-[#f7f8fa] p-5">
+              <p className="text-sm text-[#667085]">Etiqueta</p>
+              <p className="mt-2 text-xl font-semibold text-[#14375a]">
                 {asset.assetTag}
               </p>
             </div>
-            <div className="rounded-[24px] border border-white/8 bg-black/24 p-5">
-              <p className="text-sm text-white/50">Serie</p>
-              <p className="mt-2 text-xl font-semibold text-white">
+            <div className="rounded-lg border border-[#e4e7eb] bg-[#f7f8fa] p-5">
+              <p className="text-sm text-[#667085]">Serie</p>
+              <p className="mt-2 text-xl font-semibold text-[#14375a]">
                 {asset.serialNumber || "Sin serie registrada"}
               </p>
             </div>
-            <div className="rounded-[24px] border border-white/8 bg-black/24 p-5">
-              <p className="text-sm text-white/50">Ubicación</p>
-              <p className="mt-2 text-xl font-semibold text-white">
+            <div className="rounded-lg border border-[#e4e7eb] bg-[#f7f8fa] p-5">
+              <p className="text-sm text-[#667085]">Ubicación</p>
+              <p className="mt-2 text-xl font-semibold text-[#14375a]">
                 {asset.location || "Sin ubicación registrada"}
               </p>
             </div>
-            <div className="rounded-[24px] border border-white/8 bg-black/24 p-5">
-              <p className="text-sm text-white/50">Centro de costo</p>
-              <p className="mt-2 text-xl font-semibold text-white">
+            <div className="rounded-lg border border-[#e4e7eb] bg-[#f7f8fa] p-5">
+              <p className="text-sm text-[#667085]">Centro de costo</p>
+              <p className="mt-2 text-xl font-semibold text-[#14375a]">
                 {asset.costCenter || "Sin centro de costo"}
               </p>
             </div>
@@ -120,15 +120,15 @@ export default async function AssetDetailPage({
             title="A quién pertenece o quién responde por este activo"
             description="Esta referencia ayuda a ordenar validaciones, auditorías y revisiones de diferencias."
           />
-          <div className="rounded-[24px] border border-white/8 bg-black/24 p-5">
-            <p className="text-sm text-white/50">Responsable</p>
-            <p className="mt-2 text-2xl font-semibold text-white">
+          <div className="rounded-lg border border-[#e4e7eb] bg-[#f7f8fa] p-5">
+            <p className="text-sm text-[#667085]">Responsable</p>
+            <p className="mt-2 text-2xl font-semibold text-[#14375a]">
               {asset.responsible || "Sin responsable registrado"}
             </p>
           </div>
-          <div className="rounded-[24px] border border-white/8 bg-black/24 p-5">
-            <p className="text-sm text-white/50">Estado</p>
-            <p className="mt-2 text-2xl font-semibold text-white">
+          <div className="rounded-lg border border-[#e4e7eb] bg-[#f7f8fa] p-5">
+            <p className="text-sm text-[#667085]">Estado</p>
+            <p className="mt-2 text-2xl font-semibold text-[#14375a]">
               {asset.isActive ? "Activo en operación" : "Fuera de operación"}
             </p>
           </div>

@@ -1,10 +1,9 @@
+import Image from "next/image";
 import { redirect } from "next/navigation";
+import { ShieldCheck } from "lucide-react";
 
 import { getAuthSession } from "@/src/features/auth/session";
 import { LoginForm } from "@/src/features/auth/login-form";
-import { landingNavItems } from "@/src/shared/content/showcase";
-import { Panel } from "@/src/shared/ui/panel";
-import { TopNav } from "@/src/shared/ui/top-nav";
 
 export default async function LoginPage() {
   const session = await getAuthSession();
@@ -14,49 +13,58 @@ export default async function LoginPage() {
   }
 
   return (
-    <main className="mx-auto flex w-full max-w-[1680px] flex-1 flex-col gap-10 px-4 py-6 sm:px-6 lg:px-8">
-      <TopNav
-        brand="AssetLens"
-        ctaHref="/"
-        ctaLabel="Volver al inicio"
-        items={landingNavItems}
-      />
+    <main className="grid min-h-screen place-items-center overflow-hidden bg-[#f4f7fb] px-4 py-8 text-[#14375a] sm:px-6 lg:px-10">
+      <section className="grid w-full max-w-[1520px] overflow-hidden rounded-[28px] border border-[#e4e7eb] bg-white shadow-[0_30px_90px_rgba(20,55,90,0.14)] lg:min-h-[760px] lg:grid-cols-[39rem_minmax(0,1fr)]">
+        <div className="flex flex-col items-center justify-center px-8 py-10 sm:px-12 lg:px-16">
+          <div className="w-full max-w-[29rem] text-center">
+            <div className="mx-auto h-[12rem] w-full max-w-[22rem]">
+              <Image
+                alt="NovusOne AssetLens"
+                className="h-full w-full object-contain"
+                height={220}
+                priority
+                src="/logo.png"
+                width={540}
+              />
+            </div>
 
-      <section className="grid min-h-[78vh] items-center gap-8 xl:grid-cols-[0.9fr_1.1fr]">
-        <div className="space-y-6">
-          <span className="text-sm font-semibold uppercase tracking-[0.3em] text-emerald-300/72">
-            Acceso a la plataforma
-          </span>
-          <div className="space-y-4">
-            <h1 className="max-w-3xl text-balance text-5xl font-semibold tracking-[-0.07em] text-white sm:text-7xl">
-              Ingrese para administrar campañas, capturas y revisión de inventario.
-            </h1>
-            <p className="max-w-2xl text-base leading-8 text-white/62 sm:text-lg">
-              Acceda al panel principal para revisar el avance de los conteos,
-              configurar campañas y continuar el trabajo del equipo en terreno.
+            <div className="mx-auto -mt-3 h-1 w-16 rounded-full bg-[#16b8ac]" />
+
+            <p className="mx-auto mt-8 max-w-[25rem] text-2xl leading-9 text-[#667085]">
+              Inventario, evidencia y trazabilidad de activos fijos desde el celular.
             </p>
-          </div>
 
-          <div className="grid gap-4 md:grid-cols-3">
-            <Panel padding="sm">
-              <p className="text-sm text-white/50">Campañas</p>
-              <p className="mt-2 text-xl font-semibold text-white">Control central</p>
-            </Panel>
-            <Panel padding="sm">
-              <p className="text-sm text-white/50">Sesión</p>
-              <p className="mt-2 text-xl font-semibold text-white">Acceso protegido</p>
-            </Panel>
-            <Panel padding="sm">
-              <p className="text-sm text-white/50">Integración</p>
-              <p className="mt-2 text-xl font-semibold text-white">
-                Entra ID
+            <div className="mt-14">
+              <LoginForm />
+            </div>
+
+            <div className="mt-12 flex items-start gap-4 text-left">
+              <div className="grid h-12 w-12 shrink-0 place-items-center rounded-full bg-[#ecfffb] text-[#16b8ac]">
+                <ShieldCheck aria-hidden="true" className="h-7 w-7" strokeWidth={2} />
+              </div>
+              <p className="text-base font-semibold leading-7 text-[#667085]">
+                Seguridad empresarial con Microsoft Entra ID MFA y acceso
+                condicionado habilitados.
               </p>
-            </Panel>
+            </div>
+
+            <div className="mt-14 h-px bg-[#e4e7eb]" />
+
+            <p className="mt-8 text-sm font-medium text-[#98a2b3]">
+              © 2026 NovusOne. Todos los derechos reservados.
+            </p>
           </div>
         </div>
 
-        <div className="flex justify-center xl:justify-end">
-          <LoginForm />
+        <div className="relative min-h-[42rem] overflow-hidden bg-[#06243a] lg:min-h-full">
+          <Image
+            alt="Escaneo de activo desde celular"
+            className="object-cover"
+            fill
+            priority
+            sizes="(min-width: 1024px) 58vw, 100vw"
+            src="/banner.png"
+          />
         </div>
       </section>
     </main>

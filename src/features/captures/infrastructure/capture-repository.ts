@@ -8,6 +8,7 @@ import type {
 } from "@/src/features/captures/domain/asset-capture";
 import { getRequiredAuthContext } from "@/src/features/auth/auth-context";
 import { prisma } from "@/src/lib/db/prisma";
+import { filterPrismaModelData } from "@/src/lib/db/prisma-model-data";
 
 type CaptureRecord = Prisma.AssetCaptureGetPayload<{
   include: {
@@ -18,6 +19,30 @@ type CaptureRecord = Prisma.AssetCaptureGetPayload<{
 
 function toStringValue(value: Prisma.Decimal | null) {
   return value ? value.toString() : "";
+}
+
+function parseCustomFields(value: string | null | undefined): Record<string, string> {
+  if (!value) {
+    return {};
+  }
+
+  try {
+    const parsed = JSON.parse(value);
+
+    if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
+      return {};
+    }
+
+    return Object.fromEntries(
+      Object.entries(parsed)
+        .filter((entry): entry is [string, string] => {
+          const [key, item] = entry;
+          return typeof key === "string" && typeof item === "string";
+        }),
+    );
+  } catch {
+    return {};
+  }
 }
 
 function mapCaptureRecord(capture: CaptureRecord): AssetCapture {
@@ -39,6 +64,7 @@ function mapCaptureRecord(capture: CaptureRecord): AssetCapture {
     observedCostCenter: capture.condition?.observedCostCenter ?? "",
     observedSerialNumber: capture.condition?.observedSerialNumber ?? "",
     conditionNotes: capture.condition?.notes ?? "",
+    customFields: parseCustomFields(capture.condition?.customFieldsJson),
   };
 }
 
@@ -130,7 +156,7 @@ export const captureRepository = {
       });
 
       await tx.assetCaptureCondition.create({
-        data: {
+        data: filterPrismaModelData("AssetCaptureCondition", {
           tenantId: scope.tenantId,
           campaignId: scope.campaignId,
           captureId: created.id,
@@ -139,8 +165,12 @@ export const captureRepository = {
           observedResponsible: input.observedResponsible || null,
           observedCostCenter: input.observedCostCenter || null,
           observedSerialNumber: input.observedSerialNumber || null,
+          customFieldsJson:
+            Object.keys(input.customFields).length > 0
+              ? JSON.stringify(input.customFields)
+              : null,
           notes: input.conditionNotes || null,
-        },
+        }) as Prisma.AssetCaptureConditionUncheckedCreateInput,
       });
 
       await tx.asset.update({

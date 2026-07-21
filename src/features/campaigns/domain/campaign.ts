@@ -1,9 +1,9 @@
 import type { CampaignStatus } from "@/src/features/campaigns/domain/campaign-status";
 
 export const inventoryModes = [
-  "full_count",
-  "selective",
-  "cycle_count",
+  "simple_count",
+  "full_audit",
+  "custom",
 ] as const;
 
 export type InventoryMode = (typeof inventoryModes)[number];
@@ -33,26 +33,36 @@ export type CreateCampaignDraft = {
   name: string;
   code: string;
   clientName: string;
+  description: string;
   siteName: string;
   inventoryMode: InventoryMode;
   scheduledStartAt: string;
   scheduledEndAt: string;
+  captureRequiresPhoto: boolean;
+  captureRequiresGeo: boolean;
+  allowManualAssets: boolean;
+  closeBlocksCaptures: boolean;
 };
 
 export const defaultCampaignDraft: CreateCampaignDraft = {
   name: "",
   code: "",
   clientName: "",
+  description: "",
   siteName: "",
-  inventoryMode: "full_count",
+  inventoryMode: "simple_count",
   scheduledStartAt: "",
   scheduledEndAt: "",
+  captureRequiresPhoto: false,
+  captureRequiresGeo: false,
+  allowManualAssets: false,
+  closeBlocksCaptures: true,
 };
 
 const inventoryModeLabels: Record<InventoryMode, string> = {
-  full_count: "Conteo total",
-  selective: "Selectivo",
-  cycle_count: "Cíclico",
+  simple_count: "Conteo simple",
+  full_audit: "Auditoría completa",
+  custom: "Personalizado",
 };
 
 export function getInventoryModeLabel(mode: InventoryMode) {

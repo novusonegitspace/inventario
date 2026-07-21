@@ -106,8 +106,8 @@ model Campaign {
   siteName               String?                           @map("site_name")
   /// Allowed values: DRAFT, ACTIVE, CLOSED
   status                 String                            @default("DRAFT")
-  /// Allowed values: FULL_COUNT, SELECTIVE, CYCLE_COUNT
-  inventoryMode          String                            @default("FULL_COUNT") @map("inventory_mode")
+  /// Allowed values: SIMPLE_COUNT, FULL_AUDIT, CUSTOM
+  inventoryMode          String                            @default("SIMPLE_COUNT") @map("inventory_mode")
   progressPercentage     Int                               @default(0) @map("progress_percentage")
   scheduledStartAt       DateTime?                         @map("scheduled_start_at")
   scheduledEndAt         DateTime?                         @map("scheduled_end_at")
@@ -144,38 +144,69 @@ model Campaign {
 }
 
 model CampaignSettings {
-  id                   String   @id @default(uuid())
-  tenantId             String   @map("tenant_id")
-  campaignId           String   @unique @map("campaign_id")
-  captureRequiresPhoto Boolean  @default(false) @map("capture_requires_photo")
-  captureRequiresGeo   Boolean  @default(false) @map("capture_requires_geo")
-  allowManualAssets    Boolean  @default(false) @map("allow_manual_assets")
-  closeBlocksCaptures  Boolean  @default(true) @map("close_blocks_captures")
-  notes                String?
-  createdAt            DateTime @default(now()) @map("created_at")
-  updatedAt            DateTime @updatedAt @map("updated_at")
-  tenant               Tenant   @relation(fields: [tenantId], references: [id])
-  campaign             Campaign @relation(fields: [campaignId], references: [id])
+  id                               String   @id @default(uuid())
+  tenantId                         String   @map("tenant_id")
+  campaignId                       String   @unique @map("campaign_id")
+  /// Allowed values: BULK_ONLY, MANUAL_ONLY, HYBRID
+  assetManagementMethod            String   @default("BULK_ONLY") @map("asset_management_method")
+  allowOfflineCapture              Boolean  @default(true) @map("allow_offline_capture")
+  allowEditRecords                 Boolean  @default(true) @map("allow_edit_records")
+  requireSupervisorReview          Boolean  @default(true) @map("require_supervisor_review")
+  autoCloseCampaign                Boolean  @default(false) @map("auto_close_campaign")
+  allowSurplusAssets               Boolean  @default(false) @map("allow_surplus_assets")
+  manualAssetLimit                 Int?     @map("manual_asset_limit")
+  /// Allowed values: REQUIRED, OPTIONAL, NOT_APPLICABLE
+  primaryPhotoRequirement          String   @default("OPTIONAL") @map("primary_photo_requirement")
+  /// Allowed values: REQUIRED, OPTIONAL, NOT_APPLICABLE
+  additionalPhotosRequirement      String   @default("OPTIONAL") @map("additional_photos_requirement")
+  additionalPhotosMin              Int      @default(0) @map("additional_photos_min")
+  /// Allowed values: REQUIRED, OPTIONAL, NOT_APPLICABLE
+  otherFilesRequirement            String   @default("OPTIONAL") @map("other_files_requirement")
+  /// Allowed values: REQUIRED, OPTIONAL, NOT_APPLICABLE, REQUIRED_WHEN_DIFFERENCE
+  photoObservationRule             String   @default("OPTIONAL") @map("photo_observation_rule")
+  conditionOptionsJson             String?  @map("condition_options_json")
+  conditionRequiresObservationRule String?  @map("condition_requires_observation_rule")
+  captureRequiresPhoto             Boolean  @default(false) @map("capture_requires_photo")
+  captureRequiresGeo               Boolean  @default(false) @map("capture_requires_geo")
+  allowManualAssets                Boolean  @default(false) @map("allow_manual_assets")
+  closeBlocksCaptures              Boolean  @default(true) @map("close_blocks_captures")
+  notes                            String?
+  createdAt                        DateTime @default(now()) @map("created_at")
+  updatedAt                        DateTime @updatedAt @map("updated_at")
+  tenant                           Tenant   @relation(fields: [tenantId], references: [id])
+  campaign                         Campaign @relation(fields: [campaignId], references: [id])
 
   @@index([tenantId, campaignId])
   @@map("campaign_settings")
 }
 
 model CampaignInventoryField {
-  id         String   @id @default(uuid())
-  tenantId   String   @map("tenant_id")
-  campaignId String   @map("campaign_id")
-  key        String
-  label      String
-  /// Allowed values: TEXT, NUMBER, DATE, BOOLEAN, SELECT
-  dataType   String   @map("data_type")
-  isRequired Boolean  @default(false) @map("is_required")
-  isVisible  Boolean  @default(true) @map("is_visible")
-  position   Int      @default(0)
-  createdAt  DateTime @default(now()) @map("created_at")
-  updatedAt  DateTime @updatedAt @map("updated_at")
-  tenant     Tenant   @relation(fields: [tenantId], references: [id])
-  campaign   Campaign @relation(fields: [campaignId], references: [id])
+  id                      String   @id @default(uuid())
+  tenantId                String   @map("tenant_id")
+  campaignId              String   @map("campaign_id")
+  key                     String
+  label                   String
+  /// Allowed values: TEXT, NUMBER, DATE, BOOLEAN, SELECT, FILE
+  dataType                String   @map("data_type")
+  /// Allowed values: REQUIRED, OPTIONAL, NOT_APPLICABLE
+  requirement             String   @default("OPTIONAL")
+  helpText                String?  @map("help_text")
+  optionsJson             String?  @map("options_json")
+  defaultValue            String?  @map("default_value")
+  showInMobileCapture     Boolean  @default(true) @map("show_in_mobile_capture")
+  showInAssetDetail       Boolean  @default(true) @map("show_in_asset_detail")
+  showInReports           Boolean  @default(true) @map("show_in_reports")
+  visibilityConditionJson String?  @map("visibility_condition_json")
+  isSystem                Boolean  @default(false) @map("is_system")
+  /// Allowed values: CAPTURE, SURPLUS, BOTH
+  scope                   String   @default("CAPTURE")
+  isRequired              Boolean  @default(false) @map("is_required")
+  isVisible               Boolean  @default(true) @map("is_visible")
+  position                Int      @default(0)
+  createdAt               DateTime @default(now()) @map("created_at")
+  updatedAt               DateTime @updatedAt @map("updated_at")
+  tenant                  Tenant   @relation(fields: [tenantId], references: [id])
+  campaign                Campaign @relation(fields: [campaignId], references: [id])
 
   @@unique([campaignId, key])
   @@index([tenantId, campaignId])
@@ -219,7 +250,7 @@ model AssetMasterRow {
   tenant          Tenant     @relation(fields: [tenantId], references: [id])
   campaign        Campaign   @relation(fields: [campaignId], references: [id])
   importJob       ImportJob? @relation(fields: [importJobId], references: [id])
-  asset           Asset?
+  assets          Asset[]
 
   @@unique([tenantId, campaignId, rowNumber])
   @@index([tenantId, campaignId])
@@ -234,7 +265,7 @@ model Asset {
   id                    String                 @id @default(uuid())
   tenantId              String                 @map("tenant_id")
   campaignId            String                 @map("campaign_id")
-  assetMasterRowId      String?                @unique @map("asset_master_row_id")
+  assetMasterRowId      String?                @map("asset_master_row_id")
   assetTag              String                 @map("asset_tag")
   barcode               String?
   name                  String
@@ -256,6 +287,7 @@ model Asset {
   findings              Finding[]
 
   @@unique([tenantId, campaignId, assetTag])
+  @@index([assetMasterRowId])
   @@index([tenantId, campaignId, barcode])
   @@index([tenantId, campaignId])
   @@index([campaignId])
@@ -343,6 +375,7 @@ model AssetCaptureCondition {
   observedResponsible  String?      @map("observed_responsible")
   observedCostCenter   String?      @map("observed_cost_center")
   observedSerialNumber String?      @map("observed_serial_number")
+  customFieldsJson     String?      @map("custom_fields_json")
   notes                String?
   tenant               Tenant       @relation(fields: [tenantId], references: [id])
   campaign             Campaign     @relation(fields: [campaignId], references: [id])
@@ -494,27 +527,35 @@ model AuditLog {
 }
 
 model ImportJob {
-  id              String           @id @default(uuid())
-  tenantId        String           @map("tenant_id")
-  campaignId      String?          @map("campaign_id")
-  requestedById   String?          @map("requested_by_id")
+  id                    String           @id @default(uuid())
+  tenantId              String           @map("tenant_id")
+  campaignId            String?          @map("campaign_id")
+  requestedById         String?          @map("requested_by_id")
   /// Allowed values: ASSET_MASTER
-  kind            String
+  kind                  String
   /// Allowed values: QUEUED, RUNNING, SUCCEEDED, FAILED, CANCELED
-  status          String           @default("QUEUED")
-  sourceFileName  String           @map("source_file_name")
-  sourceBlobPath  String?          @map("source_blob_path")
-  totalRows       Int?             @map("total_rows")
-  processedRows   Int?             @map("processed_rows")
-  errorMessage    String?          @map("error_message")
-  startedAt       DateTime?        @map("started_at")
-  completedAt     DateTime?        @map("completed_at")
-  createdAt       DateTime         @default(now()) @map("created_at")
-  updatedAt       DateTime         @updatedAt @map("updated_at")
-  tenant          Tenant           @relation(fields: [tenantId], references: [id])
-  campaign        Campaign?        @relation(fields: [campaignId], references: [id])
-  requestedBy     User?            @relation("ImportRequestedBy", fields: [requestedById], references: [id])
-  assetMasterRows AssetMasterRow[]
+  status                String           @default("QUEUED")
+  sourceFileName        String           @map("source_file_name")
+  originalFileName      String?          @map("original_file_name")
+  sourceBlobPath        String?          @map("source_blob_path")
+  fileSizeBytes         BigInt?          @map("file_size_bytes")
+  totalRows             Int?             @map("total_rows")
+  processedRows         Int?             @map("processed_rows")
+  validRows             Int?             @map("valid_rows")
+  warningRows           Int?             @map("warning_rows")
+  errorRows             Int?             @map("error_rows")
+  validationSummaryJson String?          @map("validation_summary_json")
+  errorMessage          String?          @map("error_message")
+  startedAt             DateTime?        @map("started_at")
+  validatedAt           DateTime?        @map("validated_at")
+  confirmedAt           DateTime?        @map("confirmed_at")
+  completedAt           DateTime?        @map("completed_at")
+  createdAt             DateTime         @default(now()) @map("created_at")
+  updatedAt             DateTime         @updatedAt @map("updated_at")
+  tenant                Tenant           @relation(fields: [tenantId], references: [id])
+  campaign              Campaign?        @relation(fields: [campaignId], references: [id])
+  requestedBy           User?            @relation("ImportRequestedBy", fields: [requestedById], references: [id])
+  assetMasterRows       AssetMasterRow[]
 
   @@index([tenantId, campaignId])
   @@index([tenantId, status])

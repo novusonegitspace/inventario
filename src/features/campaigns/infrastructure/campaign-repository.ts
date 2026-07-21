@@ -8,7 +8,9 @@ import type {
   InventoryMode,
 } from "@/src/features/campaigns/domain/campaign";
 import { getRequiredAuthContext } from "@/src/features/auth/auth-context";
+import { getPresetForMode } from "@/src/features/campaign-settings/domain/capture-settings";
 import { prisma } from "@/src/lib/db/prisma";
+import { filterPrismaModelData } from "@/src/lib/db/prisma-model-data";
 
 export type CampaignRepository = {
   list(): Promise<Campaign[]>;
@@ -22,6 +24,14 @@ function mapCampaignStatus(status: string) {
     return "active";
   }
 
+  if (status === "IN_REVIEW") {
+    return "in_review";
+  }
+
+  if (status === "COMPLETED") {
+    return "completed";
+  }
+
   if (status === "CLOSED") {
     return "closed";
   }
@@ -30,27 +40,27 @@ function mapCampaignStatus(status: string) {
 }
 
 function mapInventoryMode(mode: string): InventoryMode {
-  if (mode === "SELECTIVE") {
-    return "selective";
+  if (mode === "FULL_AUDIT" || mode === "CYCLE_COUNT") {
+    return "full_audit";
   }
 
-  if (mode === "CYCLE_COUNT") {
-    return "cycle_count";
+  if (mode === "CUSTOM" || mode === "SELECTIVE") {
+    return "custom";
   }
 
-  return "full_count";
+  return "simple_count";
 }
 
 function mapInventoryModeForDb(mode: InventoryMode) {
-  if (mode === "selective") {
-    return "SELECTIVE";
+  if (mode === "full_audit") {
+    return "FULL_AUDIT";
   }
 
-  if (mode === "cycle_count") {
-    return "CYCLE_COUNT";
+  if (mode === "custom") {
+    return "CUSTOM";
   }
 
-  return "FULL_COUNT";
+  return "SIMPLE_COUNT";
 }
 
 function normalizeClientCode(value: string) {
@@ -60,6 +70,74 @@ function normalizeClientCode(value: string) {
     .replace(/[^A-Z0-9]+/g, "-")
     .replace(/^-+|-+$/g, "")
     .slice(0, 24);
+}
+
+function mapAssetManagementMethodForDb(method: string) {
+  if (method === "manual_only") {
+    return "MANUAL_ONLY";
+  }
+
+  if (method === "hybrid") {
+    return "HYBRID";
+  }
+
+  return "BULK_ONLY";
+}
+
+function mapEvidenceRequirementForDb(requirement: string) {
+  if (requirement === "required") {
+    return "REQUIRED";
+  }
+
+  if (requirement === "not_applicable") {
+    return "NOT_APPLICABLE";
+  }
+
+  if (requirement === "required_when_difference") {
+    return "REQUIRED_WHEN_DIFFERENCE";
+  }
+
+  return "OPTIONAL";
+}
+
+function mapFieldRequirementForDb(requirement: string) {
+  if (requirement === "required") {
+    return "REQUIRED";
+  }
+
+  if (requirement === "not_applicable") {
+    return "NOT_APPLICABLE";
+  }
+
+  return "OPTIONAL";
+}
+
+function fieldData(
+  tenantId: string,
+  campaignId: string,
+  field: ReturnType<typeof getPresetForMode>["fields"][number],
+  index: number,
+) {
+  return filterPrismaModelData("CampaignInventoryField", {
+    tenantId,
+    campaignId,
+    key: field.key,
+    label: field.label,
+    dataType: field.dataType.toUpperCase(),
+    requirement: mapFieldRequirementForDb(field.requirement),
+    helpText: field.helpText || null,
+    optionsJson: field.options.length > 0 ? JSON.stringify(field.options) : null,
+    defaultValue: field.defaultValue || null,
+    showInMobileCapture: field.showInMobileCapture,
+    showInAssetDetail: field.showInAssetDetail,
+    showInReports: field.showInReports,
+    visibilityConditionJson: field.visibilityCondition || null,
+    isSystem: field.isSystem,
+    scope: field.scope.toUpperCase(),
+    isRequired: field.requirement === "required",
+    isVisible: field.requirement !== "not_applicable",
+    position: index,
+  });
 }
 
 type CampaignRecord = Prisma.CampaignGetPayload<{
@@ -158,6 +236,54 @@ export const campaignRepository: CampaignRepository = {
   async create(input) {
     const context = await getRequiredAuthContext();
     const clientCode = normalizeClientCode(input.clientName);
+    const capturePreset = getPresetForMode(input.inventoryMode);
+    const captureRequiresPhoto =
+      capturePreset.primaryPhotoRequirement === "required" ||
+      capturePreset.additionalPhotosRequirement === "required";
+    const allowManualAssets =
+      capturePreset.assetManagementMethod === "manual_only" ||
+      capturePreset.assetManagementMethod === "hybrid";
+    const settingsCreateData = filterPrismaModelData(
+      "CampaignSettings",
+      {
+        tenantId: context.tenantId,
+        assetManagementMethod: mapAssetManagementMethodForDb(
+          capturePreset.assetManagementMethod,
+        ),
+        allowOfflineCapture: capturePreset.allowOfflineCapture,
+        allowEditRecords: capturePreset.allowEditRecords,
+        requireSupervisorReview: capturePreset.requireSupervisorReview,
+        autoCloseCampaign: capturePreset.autoCloseCampaign,
+        allowSurplusAssets: capturePreset.allowSurplusAssets,
+        manualAssetLimit: capturePreset.manualAssetLimit,
+        primaryPhotoRequirement: mapEvidenceRequirementForDb(
+          capturePreset.primaryPhotoRequirement,
+        ),
+        additionalPhotosRequirement: mapEvidenceRequirementForDb(
+          capturePreset.additionalPhotosRequirement,
+        ),
+        additionalPhotosMin: capturePreset.additionalPhotosMin,
+        otherFilesRequirement: mapEvidenceRequirementForDb(
+          capturePreset.otherFilesRequirement,
+        ),
+        photoObservationRule: mapEvidenceRequirementForDb(
+          capturePreset.photoObservationRule,
+        ),
+        conditionOptionsJson: JSON.stringify(
+          capturePreset.conditionOptions,
+        ),
+        conditionRequiresObservationRule:
+          capturePreset.conditionRequiresObservationRule,
+        captureRequiresPhoto,
+        captureRequiresGeo: capturePreset.fields.some(
+          (field) =>
+            field.key === "observed_location" &&
+            field.requirement !== "not_applicable",
+        ),
+        allowManualAssets,
+        closeBlocksCaptures: !capturePreset.allowEditRecords,
+      },
+    ) as Prisma.CampaignSettingsUncheckedCreateWithoutCampaignInput;
 
     const client = await prisma.client.upsert({
       where: {
@@ -184,6 +310,7 @@ export const campaignRepository: CampaignRepository = {
         createdById: context.userId,
         code: input.code,
         name: input.name,
+        description: input.description || null,
         siteName: input.siteName,
         status: "DRAFT",
         inventoryMode: mapInventoryModeForDb(input.inventoryMode),
@@ -194,9 +321,7 @@ export const campaignRepository: CampaignRepository = {
           ? new Date(`${input.scheduledEndAt}T18:00:00.000Z`)
           : null,
         settings: {
-          create: {
-            tenantId: context.tenantId,
-          },
+          create: settingsCreateData,
         },
       },
       include: {
@@ -212,6 +337,19 @@ export const campaignRepository: CampaignRepository = {
         },
       },
     });
+
+    if (capturePreset.fields.length > 0) {
+      await prisma.campaignInventoryField.createMany({
+        data: capturePreset.fields.map((fieldItem, index) =>
+          fieldData(
+            context.tenantId,
+            campaign.id,
+            fieldItem,
+            index,
+          ) as Prisma.CampaignInventoryFieldCreateManyInput,
+        ),
+      });
+    }
 
     return mapCampaignRecord(campaign);
   },

@@ -28,10 +28,10 @@ export default async function AssetEvidencePage({
     return (
       <main className="mx-auto flex w-full max-w-[1100px] flex-1 flex-col gap-8 px-4 py-6 sm:px-6 lg:px-8">
         <Panel className="space-y-5" glow padding="lg">
-          <h1 className="text-4xl font-semibold tracking-[-0.06em] text-white">
+          <h1 className="text-4xl font-semibold tracking-[-0.06em] text-[#2d2d2d]">
             No pudimos abrir la evidencia de este activo
           </h1>
-          <p className="max-w-2xl text-base leading-7 text-white/60">
+          <p className="max-w-2xl text-base leading-7 text-[#667085]">
             Vuelva al listado de activos y seleccione un registro válido para
             revisar o adjuntar respaldos.
           </p>
@@ -56,10 +56,10 @@ export default async function AssetEvidencePage({
               <Badge tone="slate">Evidencia</Badge>
             </div>
             <div className="space-y-2">
-              <h1 className="text-4xl font-semibold tracking-[-0.06em] text-white sm:text-5xl">
+              <h1 className="text-4xl font-semibold tracking-[-0.06em] text-[#2d2d2d] sm:text-5xl">
                 {asset.name}
               </h1>
-              <p className="max-w-3xl text-base leading-7 text-white/62">
+              <p className="max-w-3xl text-base leading-7 text-[#667085]">
                 Reúna fotos y archivos de respaldo para dejar evidencia clara de
                 la revisión realizada sobre este activo.
               </p>

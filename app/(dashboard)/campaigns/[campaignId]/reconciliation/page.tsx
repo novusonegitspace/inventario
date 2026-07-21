@@ -1,5 +1,6 @@
 import { getCampaignDetail } from "@/src/features/campaigns/application/get-campaign-detail";
 import { CampaignStatusBadge } from "@/src/features/campaigns/ui/campaign-status-badge";
+import { CampaignWorkspaceNav } from "@/src/features/campaigns/ui/campaign-workspace-nav";
 import { recalculateReconciliationAction } from "@/src/features/reconciliation/actions";
 import {
   getReconciliationOverview,
@@ -28,10 +29,10 @@ export default async function CampaignReconciliationPage({
     return (
       <main className="mx-auto flex w-full max-w-[1100px] flex-1 flex-col gap-8 px-4 py-6 sm:px-6 lg:px-8">
         <Panel className="space-y-5" glow padding="lg">
-          <h1 className="text-4xl font-semibold tracking-[-0.06em] text-white">
+          <h1 className="text-4xl font-semibold tracking-[-0.06em] text-[#2d2d2d]">
             No encontramos la campaña solicitada
           </h1>
-          <p className="max-w-2xl text-base leading-7 text-white/60">
+          <p className="max-w-2xl text-base leading-7 text-[#667085]">
             Vuelva al listado de campañas y seleccione una válida para ejecutar
             la conciliación del inventario.
           </p>
@@ -57,10 +58,10 @@ export default async function CampaignReconciliationPage({
               <Badge tone="slate">Conciliación</Badge>
             </div>
             <div className="space-y-2">
-              <h1 className="text-4xl font-semibold tracking-[-0.06em] text-white sm:text-5xl">
+              <h1 className="text-4xl font-semibold tracking-[-0.06em] text-[#2d2d2d] sm:text-5xl">
                 {campaign.name}
               </h1>
-              <p className="max-w-3xl text-base leading-7 text-white/62">
+              <p className="max-w-3xl text-base leading-7 text-[#667085]">
                 Compare la información del maestro con las capturas de terreno
                 para detectar coincidencias, diferencias y activos sin registro.
               </p>
@@ -78,6 +79,8 @@ export default async function CampaignReconciliationPage({
             </Button>
           </div>
         </div>
+
+        <CampaignWorkspaceNav campaignId={campaign.id} />
       </Panel>
 
       <section className="grid gap-6 lg:grid-cols-4">

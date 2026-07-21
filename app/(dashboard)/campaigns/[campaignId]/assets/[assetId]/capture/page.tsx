@@ -1,7 +1,8 @@
 import { getAssetDetail } from "@/src/features/assets/application/get-asset-detail";
 import { getCampaignDetail } from "@/src/features/campaigns/application/get-campaign-detail";
-import { getCampaignSettings } from "@/src/features/campaigns/application/get-campaign-settings";
 import { canCaptureForCampaign } from "@/src/features/campaigns/domain/campaign-status";
+import { getCaptureSettings } from "@/src/features/campaign-settings/application/get-capture-settings";
+import { getPresetForMode } from "@/src/features/campaign-settings/domain/capture-settings";
 import { listAssetCaptures } from "@/src/features/captures/application/list-asset-captures";
 import { defaultAssetCaptureDraft } from "@/src/features/captures/domain/asset-capture";
 import { CaptureForm } from "@/src/features/captures/ui/capture-form";
@@ -20,7 +21,7 @@ export default async function AssetCapturePage({
   const [campaign, asset, settings, captures] = await Promise.all([
     getCampaignDetail(campaignId),
     getAssetDetail(campaignId, assetId),
-    getCampaignSettings(campaignId),
+    getCaptureSettings(campaignId),
     listAssetCaptures(campaignId, assetId),
   ]);
 
@@ -28,10 +29,10 @@ export default async function AssetCapturePage({
     return (
       <main className="mx-auto flex w-full max-w-[1100px] flex-1 flex-col gap-8 px-4 py-6 sm:px-6 lg:px-8">
         <Panel className="space-y-5" glow padding="lg">
-          <h1 className="text-4xl font-semibold tracking-[-0.06em] text-white">
+          <h1 className="text-4xl font-semibold tracking-[-0.06em] text-[#2d2d2d]">
             No pudimos abrir la captura de este activo
           </h1>
-          <p className="max-w-2xl text-base leading-7 text-white/60">
+          <p className="max-w-2xl text-base leading-7 text-[#667085]">
             Vuelva a la campaña y seleccione un activo válido para registrar la
             captura desde terreno.
           </p>
@@ -56,10 +57,10 @@ export default async function AssetCapturePage({
               <Badge tone="slate">Captura</Badge>
             </div>
             <div className="space-y-2">
-              <h1 className="text-4xl font-semibold tracking-[-0.06em] text-white sm:text-5xl">
+              <h1 className="text-4xl font-semibold tracking-[-0.06em] text-[#2d2d2d] sm:text-5xl">
                 {asset.name}
               </h1>
-              <p className="max-w-3xl text-base leading-7 text-white/62">
+              <p className="max-w-3xl text-base leading-7 text-[#667085]">
                 Registre el código leído, el contexto de terreno y las
                 observaciones del activo para dejar trazabilidad de la visita.
               </p>
@@ -93,7 +94,7 @@ export default async function AssetCapturePage({
           observedCostCenter: asset.costCenter,
           observedSerialNumber: asset.serialNumber,
         }}
-        requiresGeo={Boolean(settings?.captureRequiresGeo)}
+        settings={settings ?? getPresetForMode("simple_count")}
       />
 
       <section className="space-y-6">

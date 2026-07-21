@@ -26,15 +26,17 @@ function FieldError({ message }: { message?: string }) {
     return null;
   }
 
-  return <p className="text-sm text-rose-200">{message}</p>;
+  return <p className="text-sm font-semibold text-[#d92d20]">{message}</p>;
 }
 
 export function AssetForm({
   campaignId,
   canEdit,
+  manualRestrictionMessage,
 }: {
   campaignId: string;
   canEdit: boolean;
+  manualRestrictionMessage?: string;
 }) {
   const createAssetForCampaign = createAssetAction.bind(null, campaignId);
   const initialState: CreateAssetFormState = {
@@ -46,28 +48,34 @@ export function AssetForm({
   );
   const values = state?.values ?? initialState.values;
   const errors = state?.errors;
+  const formDisabled = !canEdit || Boolean(manualRestrictionMessage);
 
   return (
     <Panel className="space-y-6" glow padding="lg">
       <div className="space-y-2">
-        <h2 className="text-3xl font-semibold tracking-[-0.05em] text-white">
+        <h2 className="text-3xl font-semibold tracking-[-0.05em] text-[#2d2d2d]">
           Registrar nuevo activo
         </h2>
-        <p className="text-sm leading-7 text-white/60">
+        <p className="text-sm leading-7 text-[#667085]">
           Agregue manualmente activos para preparar el conteo, asignar ubicación
           y dejar clara la responsabilidad antes de salir a terreno.
         </p>
+        {manualRestrictionMessage ? (
+          <div className="rounded-lg border border-[#fedf89] bg-[#fffbeb] px-4 py-3 text-sm leading-6 text-[#93370d]">
+            {manualRestrictionMessage}
+          </div>
+        ) : null}
       </div>
 
       <form action={formAction} className="grid gap-5 md:grid-cols-2">
         <div className="space-y-2">
-          <label className="text-sm font-medium text-white/72" htmlFor="barcode">
+          <label className="text-sm font-semibold text-[#344054]" htmlFor="barcode">
             Código de barras
           </label>
           <input
-            className="h-13 w-full rounded-2xl border border-white/10 bg-white/6 px-4 text-white outline-none transition placeholder:text-white/28 focus:border-emerald-300/50 disabled:opacity-60"
+            className="h-12 w-full rounded-lg border border-[#d6deea] bg-white px-4 text-[#14375a] outline-none transition placeholder:text-[#98a2b3] focus:border-[#16b8ac] disabled:cursor-not-allowed disabled:bg-[#f7f8fa] disabled:text-[#98a2b3]"
             defaultValue={values.barcode}
-            disabled={!canEdit}
+            disabled={formDisabled}
             id="barcode"
             name="barcode"
             placeholder="7501234567890"
@@ -76,32 +84,32 @@ export function AssetForm({
         </div>
 
         <div className="space-y-2">
-          <label className="text-sm font-medium text-white/72" htmlFor="assetTag">
+          <label className="text-sm font-semibold text-[#344054]" htmlFor="assetTag">
             Etiqueta interna
           </label>
           <input
-            className="h-13 w-full rounded-2xl border border-white/10 bg-white/6 px-4 text-white outline-none transition placeholder:text-white/28 focus:border-emerald-300/50 disabled:opacity-60"
+            className="h-12 w-full rounded-lg border border-[#d6deea] bg-white px-4 text-[#14375a] outline-none transition placeholder:text-[#98a2b3] focus:border-[#16b8ac] disabled:cursor-not-allowed disabled:bg-[#f7f8fa] disabled:text-[#98a2b3]"
             defaultValue={values.assetTag}
-            disabled={!canEdit}
+            disabled={formDisabled}
             id="assetTag"
             name="assetTag"
             placeholder="ACT-000124"
           />
           <FieldError message={errors?.assetTag} />
-          <p className="text-xs leading-6 text-white/42">
+          <p className="text-xs leading-6 text-[#667085]">
             Use este campo para la referencia interna. La captura móvil debe
             apoyarse principalmente en el código de barras.
           </p>
         </div>
 
         <div className="space-y-2">
-          <label className="text-sm font-medium text-white/72" htmlFor="name">
+          <label className="text-sm font-semibold text-[#344054]" htmlFor="name">
             Nombre del activo
           </label>
           <input
-            className="h-13 w-full rounded-2xl border border-white/10 bg-white/6 px-4 text-white outline-none transition placeholder:text-white/28 focus:border-emerald-300/50 disabled:opacity-60"
+            className="h-12 w-full rounded-lg border border-[#d6deea] bg-white px-4 text-[#14375a] outline-none transition placeholder:text-[#98a2b3] focus:border-[#16b8ac] disabled:cursor-not-allowed disabled:bg-[#f7f8fa] disabled:text-[#98a2b3]"
             defaultValue={values.name}
-            disabled={!canEdit}
+            disabled={formDisabled}
             id="name"
             name="name"
             placeholder="Notebook Dell Latitude"
@@ -111,15 +119,15 @@ export function AssetForm({
 
         <div className="space-y-2">
           <label
-            className="text-sm font-medium text-white/72"
+            className="text-sm font-semibold text-[#344054]"
             htmlFor="serialNumber"
           >
             Serie
           </label>
           <input
-            className="h-13 w-full rounded-2xl border border-white/10 bg-white/6 px-4 text-white outline-none transition placeholder:text-white/28 focus:border-emerald-300/50 disabled:opacity-60"
+            className="h-12 w-full rounded-lg border border-[#d6deea] bg-white px-4 text-[#14375a] outline-none transition placeholder:text-[#98a2b3] focus:border-[#16b8ac] disabled:cursor-not-allowed disabled:bg-[#f7f8fa] disabled:text-[#98a2b3]"
             defaultValue={values.serialNumber}
-            disabled={!canEdit}
+            disabled={formDisabled}
             id="serialNumber"
             name="serialNumber"
             placeholder="SN-998421"
@@ -128,13 +136,13 @@ export function AssetForm({
         </div>
 
         <div className="space-y-2">
-          <label className="text-sm font-medium text-white/72" htmlFor="costCenter">
+          <label className="text-sm font-semibold text-[#344054]" htmlFor="costCenter">
             Centro de costo
           </label>
           <input
-            className="h-13 w-full rounded-2xl border border-white/10 bg-white/6 px-4 text-white outline-none transition placeholder:text-white/28 focus:border-emerald-300/50 disabled:opacity-60"
+            className="h-12 w-full rounded-lg border border-[#d6deea] bg-white px-4 text-[#14375a] outline-none transition placeholder:text-[#98a2b3] focus:border-[#16b8ac] disabled:cursor-not-allowed disabled:bg-[#f7f8fa] disabled:text-[#98a2b3]"
             defaultValue={values.costCenter}
-            disabled={!canEdit}
+            disabled={formDisabled}
             id="costCenter"
             name="costCenter"
             placeholder="TI-OPERACIONES"
@@ -143,13 +151,13 @@ export function AssetForm({
         </div>
 
         <div className="space-y-2">
-          <label className="text-sm font-medium text-white/72" htmlFor="location">
+          <label className="text-sm font-semibold text-[#344054]" htmlFor="location">
             Ubicación
           </label>
           <input
-            className="h-13 w-full rounded-2xl border border-white/10 bg-white/6 px-4 text-white outline-none transition placeholder:text-white/28 focus:border-emerald-300/50 disabled:opacity-60"
+            className="h-12 w-full rounded-lg border border-[#d6deea] bg-white px-4 text-[#14375a] outline-none transition placeholder:text-[#98a2b3] focus:border-[#16b8ac] disabled:cursor-not-allowed disabled:bg-[#f7f8fa] disabled:text-[#98a2b3]"
             defaultValue={values.location}
-            disabled={!canEdit}
+            disabled={formDisabled}
             id="location"
             name="location"
             placeholder="Edificio Norte / Piso 2"
@@ -159,15 +167,15 @@ export function AssetForm({
 
         <div className="space-y-2">
           <label
-            className="text-sm font-medium text-white/72"
+            className="text-sm font-semibold text-[#344054]"
             htmlFor="responsible"
           >
             Responsable
           </label>
           <input
-            className="h-13 w-full rounded-2xl border border-white/10 bg-white/6 px-4 text-white outline-none transition placeholder:text-white/28 focus:border-emerald-300/50 disabled:opacity-60"
+            className="h-12 w-full rounded-lg border border-[#d6deea] bg-white px-4 text-[#14375a] outline-none transition placeholder:text-[#98a2b3] focus:border-[#16b8ac] disabled:cursor-not-allowed disabled:bg-[#f7f8fa] disabled:text-[#98a2b3]"
             defaultValue={values.responsible}
-            disabled={!canEdit}
+            disabled={formDisabled}
             id="responsible"
             name="responsible"
             placeholder="Equipo de Finanzas"
@@ -176,13 +184,13 @@ export function AssetForm({
         </div>
 
         {errors?.form ? (
-          <div className="rounded-2xl border border-rose-400/24 bg-rose-400/10 px-4 py-3 text-sm text-rose-100 md:col-span-2">
+          <div className="rounded-lg border border-[#fda29b] bg-[#fff1f1] px-4 py-3 text-sm font-semibold text-[#b42318] md:col-span-2">
             {errors.form}
           </div>
         ) : null}
 
         <div className="md:col-span-2">
-          <SubmitButton disabled={!canEdit} />
+          <SubmitButton disabled={formDisabled} />
         </div>
       </form>
     </Panel>
