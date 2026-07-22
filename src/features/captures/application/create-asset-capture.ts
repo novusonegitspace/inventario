@@ -15,6 +15,9 @@ import {
 import { captureRepository } from "@/src/features/captures/infrastructure/capture-repository";
 import { evidenceRepository } from "@/src/features/evidence/infrastructure/evidence-repository";
 
+const MAX_EVIDENCE_FILE_SIZE_BYTES = 8 * 1024 * 1024;
+const MAX_EVIDENCE_FILE_SIZE_LABEL = "8 MB";
+
 export type CreateAssetCaptureErrors = Partial<
   Record<Exclude<keyof CreateAssetCaptureDraft, "customFields">, string>
 > & {
@@ -208,6 +211,10 @@ export async function createAssetCapture(
 
   if (requiresEvidence && !evidenceFile) {
     errors.evidenceFile = "Adjunte la foto o evidencia requerida para esta captura.";
+  }
+
+  if (evidenceFile && evidenceFile.size > MAX_EVIDENCE_FILE_SIZE_BYTES) {
+    errors.evidenceFile = `La evidencia no puede superar ${MAX_EVIDENCE_FILE_SIZE_LABEL}. Tome una foto más liviana o reduzca el archivo antes de guardar.`;
   }
 
   if (
