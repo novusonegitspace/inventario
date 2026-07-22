@@ -61,8 +61,9 @@ export default async function AssetCapturePage({
                 {asset.name}
               </h1>
               <p className="max-w-3xl text-base leading-7 text-[#667085]">
-                Registre el código leído, el contexto de terreno y las
-                observaciones del activo para dejar trazabilidad de la visita.
+                Escanee el código físico del activo para validar identidad,
+                registre evidencia de terreno y confirme la captura para
+                contabilizar el inventario.
               </p>
             </div>
           </div>
@@ -83,12 +84,13 @@ export default async function AssetCapturePage({
       </Panel>
 
       <CaptureForm
+        asset={asset}
         assetId={asset.id}
         campaignId={campaign.id}
         canCapture={canCapture}
         initialValues={{
           ...defaultAssetCaptureDraft,
-          scannedCode: asset.barcode || asset.assetTag,
+          scannedCode: "",
           observedLocation: asset.location,
           observedResponsible: asset.responsible,
           observedCostCenter: asset.costCenter,

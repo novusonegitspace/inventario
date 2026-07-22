@@ -1,8 +1,22 @@
 "use client";
 
-import { useActionState, useRef } from "react";
+import { useActionState, useRef, useState } from "react";
 import { useFormStatus } from "react-dom";
+import {
+  AlertTriangle,
+  Barcode,
+  Camera,
+  CheckCircle2,
+  ClipboardCheck,
+  MapPin,
+  PackageCheck,
+  ScanLine,
+  UserRound,
+  type LucideIcon,
+} from "lucide-react";
 
+import type { Asset } from "@/src/features/assets/domain/asset";
+import { matchesAssetCode } from "@/src/features/assets/domain/asset";
 import {
   createAssetCaptureAction,
   type CreateAssetCaptureFormState,
@@ -18,6 +32,7 @@ import type {
 import { MobileBarcodeScanner } from "@/src/features/captures/ui/mobile-barcode-scanner";
 import { Badge } from "@/src/shared/ui/badge";
 import { Button } from "@/src/shared/ui/button";
+import { cn } from "@/src/shared/lib/cn";
 import { Panel } from "@/src/shared/ui/panel";
 
 function SubmitButton({ disabled }: { disabled: boolean }) {
@@ -25,7 +40,7 @@ function SubmitButton({ disabled }: { disabled: boolean }) {
 
   return (
     <Button disabled={disabled || pending} fullWidth size="lg" type="submit">
-      {pending ? "Registrando captura..." : "Guardar captura"}
+      {pending ? "Confirmando captura..." : "Confirmar captura del activo"}
     </Button>
   );
 }
@@ -130,12 +145,14 @@ function CustomFieldInput({
 }
 
 export function CaptureForm({
+  asset,
   assetId,
   campaignId,
   canCapture,
   initialValues,
   settings,
 }: {
+  asset: Asset;
   assetId: string;
   campaignId: string;
   canCapture: boolean;
@@ -159,6 +176,7 @@ export function CaptureForm({
   const values = state?.values ?? initialState.values;
   const errors = state?.errors;
   const scannedCodeInputRef = useRef<HTMLInputElement | null>(null);
+  const [scannedCode, setScannedCode] = useState(values.scannedCode);
   const activeFields = settings.fields.filter(isActiveMobileField);
   const fieldByKey = new Map(activeFields.map((field) => [field.key, field]));
   const customFields = activeFields.filter(
@@ -177,9 +195,34 @@ export function CaptureForm({
     settings.otherFilesRequirement !== "not_applicable";
   const requiresGeo =
     fieldByKey.get("observed_location")?.requirement === "required";
+  const expectedCode = asset.barcode || asset.assetTag;
+  const hasScannedCode = scannedCode.trim().length > 0;
+  const codeMatches = hasScannedCode && matchesAssetCode(scannedCode, asset);
 
   function getField(key: string) {
     return fieldByKey.get(key);
+  }
+
+  function renderAssetFact({
+    icon: Icon,
+    label,
+    value,
+  }: {
+    icon: LucideIcon;
+    label: string;
+    value: string;
+  }) {
+    return (
+      <div className="rounded-lg border border-[#e4e7eb] bg-[#f7f9fc] p-4">
+        <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-[#667085]">
+          <Icon aria-hidden="true" className="h-4 w-4" />
+          {label}
+        </div>
+        <p className="mt-2 break-words text-base font-semibold text-[#14375a]">
+          {value || "Sin información"}
+        </p>
+      </div>
+    );
   }
 
   function renderTextField({
@@ -217,6 +260,65 @@ export function CaptureForm({
         />
         {field.helpText ? <p className="text-xs leading-5 text-[#667085]">{field.helpText}</p> : null}
         <FieldError message={errors?.[name]} />
+      </div>
+    );
+  }
+
+  function renderScannedCodeField() {
+    const field = getField("asset_code");
+    const statusClass = !canCapture
+      ? "border-[#d6deea] bg-[#f7f8fa]"
+      : !hasScannedCode
+        ? "border-[#d6deea] bg-white"
+        : codeMatches
+          ? "border-[#16b8ac] bg-[#f0fffc]"
+          : "border-[#fda29b] bg-[#fff8f8]";
+    const StatusIcon = !hasScannedCode
+      ? ScanLine
+      : codeMatches
+        ? CheckCircle2
+        : AlertTriangle;
+
+    return (
+      <div className="space-y-3 md:col-span-2">
+        <label className="text-sm font-semibold text-[#344054]" htmlFor="scannedCode">
+          {field?.label ?? "Código físico escaneado"}
+          <RequiredMark required />
+        </label>
+        <input
+          className={cn(
+            "h-14 w-full rounded-lg border px-4 text-base font-semibold text-[#14375a] outline-none transition placeholder:text-[#98a2b3] focus:border-[#16b8ac] disabled:cursor-not-allowed disabled:text-[#98a2b3]",
+            statusClass,
+          )}
+          disabled={!canCapture}
+          id="scannedCode"
+          name="scannedCode"
+          onChange={(event) => setScannedCode(event.target.value)}
+          placeholder={expectedCode || "Escanee el código pegado al activo"}
+          ref={scannedCodeInputRef}
+          type="text"
+          value={scannedCode}
+        />
+        <div
+          className={cn(
+            "flex items-start gap-3 rounded-lg border px-4 py-3 text-sm leading-6",
+            !hasScannedCode
+              ? "border-[#d6e9ff] bg-[#eff6ff] text-[#2e72d2]"
+              : codeMatches
+                ? "border-[#8ed8d0] bg-[#f0fffc] text-[#0f988c]"
+                : "border-[#fda29b] bg-[#fff1f1] text-[#b42318]",
+          )}
+        >
+          <StatusIcon aria-hidden="true" className="mt-0.5 h-5 w-5 shrink-0" />
+          <span>
+            {!hasScannedCode
+              ? "Escanee o digite el código físico del activo. Este paso valida que está capturando el activo correcto."
+              : codeMatches
+                ? "Identidad verificada. El código coincide con el activo seleccionado; complete evidencia y confirme la captura."
+                : "El código no coincide con este activo. Revise si abrió el activo correcto o si la etiqueta física está equivocada."}
+          </span>
+        </div>
+        <FieldError message={errors?.scannedCode} />
       </div>
     );
   }
@@ -267,12 +369,82 @@ export function CaptureForm({
         </div>
       ) : null}
 
+      <Panel className="space-y-6" padding="lg">
+        <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
+          <div className="space-y-3">
+            <Badge>Activo esperado</Badge>
+            <div className="space-y-2">
+              <h2 className="text-3xl font-semibold tracking-[-0.04em] text-[#2d2d2d]">
+                Valide que el activo físico corresponde a {asset.name}
+              </h2>
+              <p className="max-w-3xl text-sm leading-7 text-[#667085]">
+                Esta pantalla no crea un activo nuevo. Sirve para confirmar en
+                terreno que el activo seleccionado fue encontrado, fotografiado
+                y registrado por el auditor.
+              </p>
+            </div>
+          </div>
+          <div className="rounded-lg border border-[#8ed8d0] bg-[#f0fffc] px-4 py-3 text-sm font-semibold text-[#0f988c]">
+            Código esperado: {expectedCode}
+          </div>
+        </div>
+
+        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+          {renderAssetFact({
+            icon: Barcode,
+            label: "Barcode / etiqueta",
+            value: expectedCode,
+          })}
+          {renderAssetFact({
+            icon: MapPin,
+            label: "Ubicación esperada",
+            value: asset.location,
+          })}
+          {renderAssetFact({
+            icon: UserRound,
+            label: "Responsable",
+            value: asset.responsible,
+          })}
+          {renderAssetFact({
+            icon: PackageCheck,
+            label: "Serie",
+            value: asset.serialNumber,
+          })}
+        </div>
+
+        <div className="grid gap-3 md:grid-cols-3">
+          <div className="rounded-lg border border-[#e4e7eb] bg-white p-4">
+            <ScanLine aria-hidden="true" className="h-6 w-6 text-[#0f988c]" />
+            <p className="mt-3 font-semibold text-[#14375a]">1. Escanee</p>
+            <p className="mt-1 text-sm leading-6 text-[#667085]">
+              Lea el código pegado al activo físico.
+            </p>
+          </div>
+          <div className="rounded-lg border border-[#e4e7eb] bg-white p-4">
+            <Camera aria-hidden="true" className="h-6 w-6 text-[#0f988c]" />
+            <p className="mt-3 font-semibold text-[#14375a]">2. Evidencie</p>
+            <p className="mt-1 text-sm leading-6 text-[#667085]">
+              Adjunte foto, ubicación y estado observado.
+            </p>
+          </div>
+          <div className="rounded-lg border border-[#e4e7eb] bg-white p-4">
+            <ClipboardCheck aria-hidden="true" className="h-6 w-6 text-[#0f988c]" />
+            <p className="mt-3 font-semibold text-[#14375a]">3. Confirme</p>
+            <p className="mt-1 text-sm leading-6 text-[#667085]">
+              Al guardar se contabiliza la captura del activo.
+            </p>
+          </div>
+        </div>
+      </Panel>
+
       <MobileBarcodeScanner
         disabled={!canCapture}
         onDetected={(code) => {
           if (scannedCodeInputRef.current) {
             scannedCodeInputRef.current.value = code;
           }
+
+          setScannedCode(code);
         }}
       />
 
@@ -284,8 +456,9 @@ export function CaptureForm({
               Registre la lectura del activo y deje constancia del estado observado.
             </h2>
             <p className="max-w-3xl text-base leading-7 text-[#667085]">
-              Complete el código leído, el contexto del dispositivo y las
-              observaciones de terreno para dejar trazabilidad de la captura.
+              Escanear solo valida identidad. La captura se contabiliza cuando
+              el auditor confirma este formulario con evidencia y datos de
+              terreno.
             </p>
           </div>
         </div>
@@ -295,11 +468,7 @@ export function CaptureForm({
           className="grid gap-5 md:grid-cols-2"
           encType="multipart/form-data"
         >
-          {renderTextField({
-            fieldKey: "asset_code",
-            name: "scannedCode",
-            placeholder: "ACT-000124",
-          })}
+          {renderScannedCodeField()}
 
           <div className="space-y-2">
             <label className="text-sm font-semibold text-[#344054]" htmlFor="deviceLabel">
