@@ -41,11 +41,29 @@ function getPreferredBackCameraId(devices: MediaDeviceInfo[]) {
 }
 
 export function MobileBarcodeScanner({
+  actionLabel = "Validar con cámara",
+  activeStatus = "La cámara está leyendo códigos en tiempo real.",
+  description = "Abra la cámara trasera del teléfono y lea el código físico del activo seleccionado. La app validará si corresponde al activo antes de permitir confirmar la captura.",
   disabled,
+  disabledActionLabel = "Disponible cuando la campaña esté activa",
+  disabledStatus = "La campaña todavía no admite captura móvil.",
+  idleStatus = "Abra la cámara para validar la identidad del activo.",
+  infoText = "No se contabiliza con solo escanear. La captura se registra cuando el auditor confirma y guarda el formulario.",
+  lastCodeLabel = "Código leído",
   onDetected,
+  title = "Escaneo con cámara",
 }: {
+  actionLabel?: string;
+  activeStatus?: string;
+  description?: string;
   disabled: boolean;
+  disabledActionLabel?: string;
+  disabledStatus?: string;
+  idleStatus?: string;
+  infoText?: string;
+  lastCodeLabel?: string;
   onDetected: (code: string) => void;
+  title?: string;
 }) {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const controlsRef = useRef<IScannerControls | null>(null);
@@ -179,12 +197,11 @@ export function MobileBarcodeScanner({
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="space-y-2">
           <div className="flex flex-wrap items-center gap-3">
-            <Badge>Escaneo con cámara</Badge>
+            <Badge>{title}</Badge>
             {isActive ? <Badge tone="emerald">En vivo</Badge> : null}
           </div>
           <p className="max-w-2xl text-sm leading-7 text-[#667085]">
-            Abra la cámara trasera del teléfono y lea el código directamente en
-            terreno. Al detectar el barcode, el valor se cargará en el formulario.
+            {description}
           </p>
         </div>
 
@@ -196,10 +213,10 @@ export function MobileBarcodeScanner({
             type="button"
           >
             {disabled
-              ? "Disponible cuando la campaña esté activa"
+              ? disabledActionLabel
               : isStarting
                 ? "Abriendo cámara..."
-                : "Escanear con cámara"}
+                : actionLabel}
           </Button>
           {isActive ? (
             <Button onClick={stopScanner} size="sm" type="button" variant="secondary">
@@ -243,16 +260,16 @@ export function MobileBarcodeScanner({
             </p>
             <p className="mt-2 text-lg font-semibold text-[#14375a]">
               {disabled
-                ? "La campaña todavía no admite captura móvil."
+                ? disabledStatus
                 : isActive
-                ? "La cámara está leyendo códigos en tiempo real."
-                : "Abra la cámara para iniciar el escaneo."}
+                ? activeStatus
+                : idleStatus}
             </p>
           </div>
 
           <div className="rounded-lg border border-[#e4e7eb] bg-[#f7f8fa] p-5">
             <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#667085]">
-              Último código
+              {lastCodeLabel}
             </p>
             <p className="mt-2 break-all text-lg font-semibold text-[#14375a]">
               {lastCode || "Todavía no se ha detectado ningún barcode."}
@@ -263,7 +280,7 @@ export function MobileBarcodeScanner({
             <p className="text-sm leading-7 text-[#2e72d2]">
               {disabled
                 ? "Primero inicie la campaña para habilitar el flujo de terreno. Luego la cámara quedará disponible en esta pantalla."
-                : "En navegador móvil la cámara suele exigir HTTPS o `localhost`. Si está probando desde otra IP local, el permiso puede ser rechazado por el propio navegador."}
+                : infoText}
             </p>
           </div>
 

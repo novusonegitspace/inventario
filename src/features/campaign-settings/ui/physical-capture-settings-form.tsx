@@ -192,7 +192,7 @@ function ManualAssetSubmitButton({ disabled }: { disabled: boolean }) {
       disabled={disabled || pending}
       type="submit"
     >
-      {pending ? "Registrando..." : "Registrar activo"}
+      {pending ? "Guardando..." : "Guardar en maestro"}
     </button>
   );
 }
@@ -507,9 +507,10 @@ function ManualAssetModal({
       >
         <div className="flex items-start justify-between gap-4 border-b border-[#eef1f5] p-6">
           <div>
-            <h2 className="text-2xl font-semibold text-[#14375a]">Registrar activo manual</h2>
+            <h2 className="text-2xl font-semibold text-[#14375a]">Registrar activo en maestro</h2>
             <p className="mt-2 text-sm leading-6 text-[#667085]">
-              Cree un activo directamente en esta campaña para casos manuales o excepciones del maestro.
+              Cree la ficha previa del activo para que luego pueda ser validado
+              y capturado en terreno.
             </p>
           </div>
           <button
@@ -524,7 +525,9 @@ function ManualAssetModal({
         <div className="space-y-5 p-6">
           <div className="rounded-xl border border-[#e4e7eb] bg-[#f8fffd] px-4 py-3 text-sm leading-6 text-[#46618a]">
             <span className="font-semibold text-[#14375a]">Uso recomendado:</span>{" "}
-            registre aquí activos puntuales. Para listados grandes use la carga maestra.
+            registre aquí activos puntuales del maestro. Esto no marca el activo
+            como encontrado ni suma avance; la captura se cuenta después desde
+            el flujo móvil.
             {manualAssetLimit !== null ? (
               <span className="mt-1 block font-semibold text-[#0f988c]">
                 Límite configurado: {manualAssetLimit} activos manuales.
@@ -536,7 +539,7 @@ function ManualAssetModal({
             <ManualAssetField
               disabled={!canEdit}
               error={state.errors?.assetTag}
-              label="Código interno / etiqueta"
+              label="Etiqueta interna del maestro"
               name="assetTag"
               placeholder="Ej: PC-001245"
               required
@@ -545,7 +548,7 @@ function ManualAssetModal({
             <ManualAssetField
               disabled={!canEdit}
               error={state.errors?.barcode}
-              label="Código QR / código de barras"
+              label="Código físico escaneable"
               name="barcode"
               placeholder="Ej: 7807210026386"
               required
