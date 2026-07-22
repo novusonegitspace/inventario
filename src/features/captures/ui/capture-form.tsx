@@ -579,6 +579,7 @@ export function CaptureForm({
               />
               <p className="text-xs leading-5 text-[#667085]">
                 La evidencia queda asociada a la captura con hash, usuario, fecha y dispositivo.
+                Tamaño máximo: 8 MB.
               </p>
               <FieldError message={errors?.evidenceFile} />
             </div>
